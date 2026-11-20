@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1b2d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Herramientas Eléctricas">
+<title>Herramientas Eléctricas</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef1f5; --card:#ffffff; --ink:#0f1b2d; --muted:#5b6778; --line:#d8dee7;
+  --brand:#0f1b2d; --brand2:#18304f; --acc:#f5a300; --acc-ink:#1a1200;
+  --ok:#1b8a4b; --warn:#c77700; --bad:#c62828; --chip:#e5eaf1;
+  --radius:14px;
+}
+[data-theme="dark"]{
+  --bg:#0a121e; --card:#121e30; --ink:#e8eef7; --muted:#93a1b5; --line:#22324a;
+  --brand:#060d17; --brand2:#0f1b2d; --chip:#1a2a42;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:16px;-webkit-tap-highlight-color:transparent}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+header{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;padding:calc(10px + env(safe-area-inset-top)) 14px 12px}
+.hrow{display:flex;align-items:center;gap:10px;max-width:640px;margin:0 auto}
+.logo{width:38px;height:38px;border-radius:10px;background:var(--acc);display:grid;place-items:center;flex:none}
+.logo svg{width:24px;height:24px}
+.htitle{flex:1;min-width:0}
+.htitle b{display:block;font-size:17px;letter-spacing:.2px}
+.htitle small{color:#b9c6d8;font-size:12px}
+.iconbtn{background:rgba(255,255,255,.1);border:0;color:#fff;width:38px;height:38px;border-radius:10px;font-size:18px;cursor:pointer;flex:none}
+.search{max-width:640px;margin:10px auto 0;position:relative}
+.search input{width:100%;border:0;border-radius:11px;padding:11px 12px 11px 38px;font:inherit;font-size:15px;background:#fff;color:#0f1b2d}
+.search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:18px;height:18px;opacity:.5}
+main{max-width:640px;margin:0 auto;padding:14px 14px calc(90px + env(safe-area-inset-bottom))}
+.sec-title{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin:18px 4px 8px}
+.list{background:var(--card);border-radius:var(--radius);overflow:hidden;border:1px solid var(--line)}
+.item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line);cursor:pointer;text-decoration:none;color:inherit}
+.item:last-child{border-bottom:0}
+.item:active{background:var(--chip)}
+.ico{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;font-size:15px;font-weight:700;flex:none;color:#fff}
+.item .t{flex:1;min-width:0}
+.item .t b{display:block;font-weight:500;font-size:15px}
+.item .t span{display:block;color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chev{color:var(--muted);font-size:18px}
+.empty{padding:28px 16px;text-align:center;color:var(--muted)}
+nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:20;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs .in{display:flex;max-width:640px;width:100%}
+nav.tabs button{flex:1;min-width:0;background:none;border:0;padding:8px 1px 9px;font:inherit;font-size:9.8px;color:var(--muted);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+nav.tabs button .ti{font-size:18px;line-height:1}
+nav.tabs button.on{color:var(--ink);font-weight:600}
+nav.tabs button.on .ti{color:var(--acc)}
+/* calculator view */
+.back{display:inline-flex;align-items:center;gap:6px;background:none;border:0;color:var(--muted);font:inherit;font-size:14px;padding:4px 0;cursor:pointer}
+.ctitle{display:flex;align-items:flex-start;gap:10px;margin:6px 0 4px}
+.ctitle h1{font-size:21px;margin:0;flex:1;line-height:1.25}
+.star{background:none;border:0;font-size:24px;cursor:pointer;color:var(--muted);padding:0 2px}
+.star.on{color:var(--acc)}
+.cdesc{color:var(--muted);font-size:14px;margin:0 0 12px;line-height:1.45}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px}
+.field{margin-bottom:12px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px;font-weight:500}
+.inwrap{display:flex;align-items:stretch;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg)}
+.inwrap:focus-within{border-color:var(--acc)}
+.inwrap input,.inwrap select{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font:inherit;font-size:16px;padding:10px 11px;outline:none}
+.inwrap select{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 17px) 50%,calc(100% - 12px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:30px}
+.inwrap textarea{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font:inherit;font-size:15px;padding:10px 11px;outline:none;resize:vertical;line-height:1.45}
+.inwrap select option{color:#0f1b2d}
+.unit{display:grid;place-items:center;padding:0 11px;font-size:13px;color:var(--muted);background:var(--chip);min-width:46px}
+.hint{font-size:12px;color:var(--muted);margin-top:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.res{margin-top:12px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:var(--radius);padding:6px 14px}
+.rrow{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line)}
+.rrow:last-child{border-bottom:0}
+.rrow .k{color:var(--muted);font-size:14px}
+.rrow .v{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:16px;text-align:right}
+.rrow.main .v{font-size:20px;color:var(--ink)}
+.rrow.main .k{color:var(--ink);font-weight:600}
+.rrow .v.txt{font-family:inherit;font-size:14.5px;max-width:64%;line-height:1.35}
+.rrow.main .v.txt{font-size:16px}
+.v.ok{color:var(--ok)} .v.warn{color:var(--warn)} .v.bad{color:var(--bad)}
+.note{margin-top:10px;font-size:12.5px;color:var(--muted);line-height:1.5;background:var(--chip);border-radius:10px;padding:10px 12px}
+.actions{display:flex;gap:8px;margin-top:12px}
+.btn{flex:1;border:0;border-radius:11px;padding:12px;font:inherit;font-weight:600;font-size:14.5px;cursor:pointer;background:var(--acc);color:var(--acc-ink)}
+.btn.sec{background:var(--chip);color:var(--ink)}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:#0f1b2d;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:50}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* tables */
+.tbl-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:12px}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{background:var(--chip);font-weight:600;font-size:12.5px;position:sticky;top:0}
+td.n{font-family:"IBM Plex Mono",monospace;text-align:right}
+tr:last-child td{border-bottom:0}
+.wrap td{white-space:normal}
+.h3{font-weight:600;margin:14px 2px 8px;font-size:15px}
+.sw{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:6px;border:1px solid rgba(0,0,0,.25)}
+.resistor{display:block;margin:4px auto 6px;max-width:300px;width:100%}
+.formula{font-family:"IBM Plex Mono",monospace;font-size:13.5px;background:var(--chip);padding:8px 10px;border-radius:8px;margin:4px 0 10px;overflow-x:auto;white-space:nowrap}
+.histitem{padding:12px 14px;border-bottom:1px solid var(--line)}
+.histitem:last-child{border-bottom:0}
+.histitem b{font-weight:600}
+.histitem pre{white-space:pre-wrap;font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--muted);margin:6px 0 0}
+.histitem .when{font-size:12px;color:var(--muted)}
+.small-link{background:none;border:0;color:var(--muted);font:inherit;font-size:13px;text-decoration:underline;cursor:pointer;padding:0}
+.install{margin-top:18px;font-size:12.5px;color:var(--muted);text-align:center;line-height:1.5}
+.badge{display:inline-block;font-size:11px;padding:2px 7px;border-radius:20px;background:var(--chip);color:var(--muted);margin-left:6px;vertical-align:2px}
+
+/* ---- Rediseño móvil ---- */
+body.home .htitle small{display:block}
+body:not(.home) .search{display:none}
+body:not(.home) header{padding-bottom:10px}
+main{padding-bottom:calc(150px + env(safe-area-inset-bottom))}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{display:flex;flex-direction:column;gap:4px;padding:16px 14px;border-radius:16px;background:var(--card);border:1px solid var(--line);text-decoration:none;color:var(--ink);position:relative;overflow:hidden;min-height:118px;box-shadow:0 1px 2px rgba(15,27,45,.05)}
+.tile:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--c)}
+.tile:active{transform:scale(.98);background:var(--chip)}
+.tile .tem{font-size:30px;line-height:1;margin-bottom:6px}
+.tile b{font-size:15.5px;line-height:1.25}
+.tile small{color:var(--muted);font-size:12.5px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;display:flex;align-items:center;gap:7px;padding:10px 14px;border-radius:24px;background:var(--card);border:1px solid var(--line);color:var(--ink);text-decoration:none;font-size:14px;font-weight:500;max-width:240px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip .dot{width:9px;height:9px;border-radius:50%;flex:none}
+.sechead{display:flex;align-items:center;gap:12px;margin:6px 0 14px;padding:14px;border-radius:16px;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--c)}
+.sechead .tem{font-size:30px}
+.sechead h1{margin:0;font-size:20px}
+.sechead small{color:var(--muted)}
+.item{padding:14px;min-height:64px}
+.item .t b{font-size:15.5px}
+.ico{width:40px;height:40px;border-radius:11px;font-size:13px}
+.back{font-size:15px;padding:8px 0;color:var(--ink);font-weight:500}
+.field label{font-size:14px;color:var(--ink)}
+.inwrap{border-radius:12px;min-height:50px}
+.inwrap input,.inwrap select{font-size:17px;padding:12px}
+.clr{background:none;border:0;color:var(--muted);font-size:22px;width:40px;cursor:pointer;flex:none}
+.inwrap input:placeholder-shown + .clr{visibility:hidden}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{flex:1 1 auto;min-height:46px;padding:8px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:15px;font-weight:500;cursor:pointer}
+.seg button.on{background:var(--brand2);border-color:var(--brand2);color:#fff;box-shadow:inset 0 -3px 0 var(--acc)}
+[data-theme="dark"] .seg button.on{background:var(--acc);border-color:var(--acc);color:var(--acc-ink);box-shadow:none}
+.res.err{border-left-color:var(--muted);margin-top:14px}
+.btn{min-height:50px;font-size:14.5px}
+.btn.mini{flex:none;min-height:36px;padding:6px 14px;margin-top:8px;font-size:13px}
+.actions{position:static}
+.rbar{position:fixed;left:0;right:0;bottom:calc(60px + env(safe-area-inset-bottom));z-index:19;margin:0 auto;max-width:620px;width:calc(100% - 20px);display:none;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:var(--brand);color:#fff;box-shadow:0 6px 20px rgba(0,0,0,.25);cursor:pointer;transition:opacity .2s,transform .2s}
+.rbar.show{display:flex}
+.rbar.hide{opacity:0;transform:translateY(10px);pointer-events:none}
+.rbar .bk{flex:1;min-width:0;font-size:13px;color:#b9c6d8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rbar .bv{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:17px;color:var(--acc);white-space:nowrap;max-width:55%;overflow:hidden;text-overflow:ellipsis}
+.rbar .bv.ok{color:#5be08f}.rbar .bv.bad{color:#ff7b7b}.rbar .bv.warn{color:#ffc65c}
+.rbar .bgo{font-size:12px;color:#b9c6d8;flex:none}
+nav.tabs button{font-size:12px;padding:9px 2px 10px}
+nav.tabs button .ti{font-size:20px}
+</style>
+</head>
+<body>
+<header>
+  <div class="hrow">
+    <div class="logo"><svg viewBox="0 0 24 24" fill="#1a1200"><path d="M13.5 2 4 13.5h6.2L9 22l10-12.2h-6.4z"/></svg></div>
+    <div class="htitle"><b>Herramientas Eléctricas</b><small>EEING · Energía e Ingeniería</small></div>
+    <button class="iconbtn" id="installBtn" title="Instalar app" style="display:none;width:auto;padding:0 12px;font-size:13px;font-weight:600;align-items:center;gap:4px;background:var(--acc);color:var(--acc-ink)" onclick="if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.finally(()=>{deferredPrompt=null;this.style.display='none'})}">⬇ Instalar</button>
+    <button class="iconbtn" id="themeBtn" title="Tema claro/oscuro">🌓</button>
+  </div>
+  <div class="search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#0f1b2d" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+    <input id="q" type="search" placeholder="Buscar cálculo, tabla o conversión…" autocomplete="off">
+  </div>
+</header>
+<main id="main"></main>
+<nav class="tabs"><div class="in" id="tabs"></div></nav>
+<div class="rbar" id="rbar"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ Utilidades ============ */
+const $=s=>document.querySelector(s);
+const SQ3=Math.sqrt(3);
+const store={get(k,d){try{const v=localStorage.getItem('he_'+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem('he_'+k,JSON.stringify(v))}catch(e){}}};
+function num(s){if(s===undefined||s===null)return NaN;s=String(s).trim().replace(/\s/g,'');if(!s)return NaN;
+  if(/^-?\d{1,3}(\.\d{3})+(,\d+)?$/.test(s)) s=s.replace(/\./g,'').replace(',','.'); else s=s.replace(',','.');
+  return Number(s);}
+function fmt(x,d){if(x===null||x===undefined||!isFinite(x))return '—';const a=Math.abs(x);
+  let dec=d!==undefined?d:(a>=1000?0:a>=100?1:a>=10?2:a>=1?2:a>=0.01?3:5);
+  return x.toLocaleString('es-NI',{maximumFractionDigits:dec,minimumFractionDigits:0});}
+const PFX=[[1e9,'G'],[1e6,'M'],[1e3,'k'],[1,''],[1e-3,'m'],[1e-6,'µ'],[1e-9,'n'],[1e-12,'p']];
+function si(x,u){if(!isFinite(x))return '—';if(x===0)return '0 '+u;const a=Math.abs(x);
+  for(const [p,s] of PFX){if(a>=p*0.9995){return (x/p).toLocaleString('es-NI',{maximumSignificantDigits:4})+' '+s+u}}
+  return x.toExponential(3)+' '+u;}
+function parseSI(s){if(!s)return NaN;s=String(s).trim().replace(',','.').replace(/[ΩFfHh]$/,'').replace(/ohm(s)?$/i,'');
+  const m=s.match(/^(-?\d*\.?\d+)\s*([pnuµmkKMG]?)$/);if(!m){const r=s.match(/^(\d+)([RrkKMmunpµ])(\d+)$/);
+    if(r){const mult={R:1,r:1,k:1e3,K:1e3,M:1e6,m:1e-3,u:1e-6,'µ':1e-6,n:1e-9,p:1e-12}[r[2]];return Number(r[1]+'.'+r[3])*mult}return NaN}
+  const mult={'':1,p:1e-12,n:1e-9,u:1e-6,'µ':1e-6,m:1e-3,k:1e3,K:1e3,M:1e6,G:1e9}[m[2]];return Number(m[1])*mult;}
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>e.classList.remove('show'),1800)}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+/* ============ Datos técnicos ============ */
+const SIZES=['14','12','10','8','6','4','3','2','1','1/0','2/0','3/0','4/0','250','300','350','400','500','600','750'];
+const SZL=i=>SIZES[i]+(i>=13?' kcmil':' AWG');
+const MM2=[2.08,3.31,5.26,8.37,13.3,21.2,26.7,33.6,42.4,53.5,67.4,85.0,107.2,126.7,152,177.3,202.7,253.4,304,380];
+const AMP_CU=[[15,20,25],[20,25,30],[30,35,40],[40,50,55],[55,65,75],[70,85,95],[85,100,115],[95,115,130],[110,130,145],[125,150,170],[145,175,195],[165,200,225],[195,230,260],[215,255,290],[240,285,320],[260,310,350],[280,335,380],[320,380,430],[350,420,475],[400,475,535]];
+const AMP_AL=[null,[15,20,25],[25,30,35],[35,40,45],[40,50,55],[55,65,75],[65,75,85],[75,90,100],[85,100,115],[100,120,135],[115,135,150],[130,155,175],[150,180,205],[170,205,230],[195,230,260],[210,250,280],[225,270,305],[260,310,350],[285,340,385],[320,385,435]];
+const SMALLMAX={cu:{0:15,1:20,2:30},al:{1:15,2:25}};
+const RHO20={cu:0.017241,al:0.028264}; const ALPHA={cu:0.00393,al:0.00403};
+const rho=(mat,T)=>RHO20[mat]*(1+ALPHA[mat]*(T-20));
+const XL_KM=0.08; // reactancia típica Ω/km
+const BRK=[15,20,25,30,35,40,45,50,60,70,80,90,100,110,125,150,175,200,225,250,300,350,400,450,500,600,700,800,1000,1200,1600,2000,2500,3000,4000,5000,6000];
+const nextBrk=x=>BRK.find(b=>b>=x-1e-9);
+const TF=[[10,1.29,1.20,1.15],[15,1.22,1.15,1.12],[20,1.15,1.11,1.08],[25,1.08,1.05,1.04],[30,1,1,1],[35,.91,.94,.96],[40,.82,.88,.91],[45,.71,.82,.87],[50,.58,.75,.82],[55,.41,.67,.76],[60,0,.58,.71],[65,0,.47,.65],[70,0,.33,.58],[75,0,0,.50],[80,0,0,.41],[85,0,0,.29]];
+function fTemp(amb,col){const ci={60:1,75:2,90:3}[col];for(const r of TF){if(amb<=r[0])return r[ci]}return 0}
+function fGroup(n){if(n<=3)return 1;if(n<=6)return .8;if(n<=9)return .7;if(n<=20)return .5;if(n<=30)return .45;if(n<=40)return .4;return .35}
+const EMT=[['1/2"',0.304],['3/4"',0.533],['1"',0.864],['1-1/4"',1.496],['1-1/2"',2.036],['2"',3.356],['2-1/2"',5.858],['3"',8.846],['3-1/2"',11.545],['4"',14.753]];
+const PVC=[['1/2"',0.285],['3/4"',0.508],['1"',0.832],['1-1/4"',1.453],['1-1/2"',1.986],['2"',3.291],['2-1/2"',4.695],['3"',7.268],['3-1/2"',9.737],['4"',12.554]];
+const THHN=[0.0097,0.0133,0.0211,0.0366,0.0507,0.0824,0.0973,0.1158,0.1562,0.1855,0.2223,0.2679,0.3237,0.3970,0.4608,0.5242,0.5863,0.7073,0.8676,1.0496];
+const IN2=645.16;
+const MOT3=[[0.5,2.4,2.2,1.1],[0.75,3.5,3.2,1.6],[1,4.6,4.2,2.1],[1.5,6.6,6.0,3.0],[2,7.5,6.8,3.4],[3,10.6,9.6,4.8],[5,16.7,15.2,7.6],[7.5,24.2,22,11],[10,30.8,28,14],[15,46.2,42,21],[20,59.4,54,27],[25,74.8,68,34],[30,88,80,40],[40,114,104,52],[50,143,130,65],[60,169,154,77],[75,211,192,96],[100,273,248,124],[125,343,312,156],[150,396,360,180],[200,528,480,240]];
+const MOT1=[[1/6,4.4,2.2],[0.25,5.8,2.9],[1/3,7.2,3.6],[0.5,9.8,4.9],[0.75,13.8,6.9],[1,16,8],[1.5,20,10],[2,24,12],[3,34,17],[5,56,28],[7.5,80,40],[10,100,50]];
+const HPL=h=>({0.1667:'1/6',0.25:'1/4',0.3333:'1/3',0.5:'1/2',0.75:'3/4'}[Math.round(h*10000)/10000]||String(h).replace('.',','));
+const TR1=[10,15,25,37.5,50,75,100,167,250,333,500];
+const TR3=[15,30,45,75,112.5,150,225,300,500,750,1000,1500,2000,2500,3000];
+const E12=[10,12,15,18,22,27,33,39,47,56,68,82];
+const COLORS=[
+ {n:'Negro',c:'#111',d:0,m:1,t:null,tc:250},{n:'Café',c:'#7b3f12',d:1,m:10,t:1,tc:100},{n:'Rojo',c:'#d32222',d:2,m:100,t:2,tc:50},
+ {n:'Naranja',c:'#f07d00',d:3,m:1e3,t:null,tc:15},{n:'Amarillo',c:'#f4d000',d:4,m:1e4,t:null,tc:25},{n:'Verde',c:'#1e9b3a',d:5,m:1e5,t:0.5,tc:20},
+ {n:'Azul',c:'#1f5fd1',d:6,m:1e6,t:0.25,tc:10},{n:'Violeta',c:'#8a3fc7',d:7,m:1e7,t:0.1,tc:5},{n:'Gris',c:'#8a8a8a',d:8,m:1e8,t:0.05,tc:1},
+ {n:'Blanco',c:'#f4f4f4',d:9,m:1e9,t:null,tc:null},{n:'Dorado',c:'#c9a227',d:null,m:0.1,t:5,tc:null},{n:'Plateado',c:'#c0c0c0',d:null,m:0.01,t:10,tc:null}];
+
+/* ============ Opciones comunes ============ */
+const O_SIS=[['1f','Monofásico'],['3f','Trifásico'],['cc','Corriente continua']];
+const O_SIS_AC=[['3f','Trifásico'],['1f','Monofásico']];
+const O_MAT=[['cu','Cobre'],['al','Aluminio']];
+const O_SIZE=SIZES.map((s,i)=>[String(i),SZL(i)]);
+const O_TINS=[['75','75 °C (THHN/THWN en terminales)'],['90','90 °C (THHN seco, XHHW-2)'],['60','60 °C (TW, UF)']];
+const O_YN=[['si','Sí'],['no','No']];
+
+/* ============ Calculadoras ============ */
+const CATS=[
+ {id:'proyectos',name:'Proyectos y estudios',em:'📋',color:'#b5332e'},
+ {id:'principales',name:'Cálculos eléctricos',em:'⚡',color:'#1f5fd1'},
+ {id:'motores',name:'Motores',em:'⚙️',color:'#7a3fc7'},
+ {id:'cctv',name:'Cámaras y CCTV',em:'📹',color:'#0e7490'},
+ {id:'redes',name:'Voz y Datos',em:'🌐',color:'#2563eb'},
+ {id:'incendio',name:'Contra incendios',em:'🔥',color:'#dc2626'},
+ {id:'electronica',name:'Electrónica',em:'🔌',color:'#0f8a6a'},
+ {id:'conversiones',name:'Conversiones',em:'🔁',color:'#c46a00'},
+ {id:'tablas',name:'Tablas eléctricas',em:'📚',color:'#53606f'}];
+const CALCS=[];
+const add=o=>CALCS.push(o);
+
+/* ---- Ley de Ohm ---- */
+add({id:'ohm',cat:'principales',ab:'Ω',name:'Ley de Ohm y potencia',desc:'Ingrese dos valores cualesquiera; se calculan los otros dos.',kw:'voltaje corriente resistencia potencia',
+ inputs:[{id:'V',l:'Tensión',u:'V',opt:1},{id:'I',l:'Corriente',u:'A',opt:1},{id:'R',l:'Resistencia',u:'Ω',opt:1},{id:'P',l:'Potencia',u:'W',opt:1}],
+ calc(v){let {V,I,R,P}=v;const k=[V,I,R,P].filter(isFinite).length;if(k<2)return {error:'Ingrese al menos dos valores.'};
+  if(isFinite(V)&&isFinite(I)){R=V/I;P=V*I}else if(isFinite(V)&&isFinite(R)){I=V/R;P=V*I}else if(isFinite(V)&&isFinite(P)){I=P/V;R=V*V/P}
+  else if(isFinite(I)&&isFinite(R)){V=I*R;P=V*I}else if(isFinite(I)&&isFinite(P)){V=P/I;R=V/I}else{V=Math.sqrt(P*R);I=Math.sqrt(P/R)}
+  return {rows:[['Tensión',si(V,'V')],['Corriente',si(I,'A')],['Resistencia',si(R,'Ω')],['Potencia',si(P,'W')]]}}});
+
+/* ---- Potencia ---- */
+add({id:'potencia',cat:'principales',ab:'P',name:'Potencia activa, reactiva y aparente',desc:'P, Q y S a partir de tensión, corriente y factor de potencia.',kw:'kw kva kvar triangulo potencias',
+ inputs:[{id:'sis',l:'Sistema',t:'sel',o:O_SIS,d:'3f'},{id:'V',l:'Tensión (línea-línea en trifásico)',u:'V',d:'480'},{id:'I',l:'Corriente',u:'A',d:'100'},{id:'fp',l:'Factor de potencia',d:'0.9',show:v=>v.sis!=='cc'}],
+ calc(v){const fp=v.sis==='cc'?1:v.fp;if(!(fp>0&&fp<=1))return {error:'El FP debe estar entre 0 y 1.'};
+  const S=(v.sis==='3f'?SQ3:1)*v.V*v.I;const P=S*fp;const Q=Math.sqrt(Math.max(S*S-P*P,0));
+  return {rows:[['Potencia activa P',fmt(P/1000)+' kW','main'],['Potencia aparente S',fmt(S/1000)+' kVA'],['Potencia reactiva Q',fmt(Q/1000)+' kVAR'],['Ángulo φ',fmt(Math.acos(fp)*180/Math.PI,1)+'°'],['Potencia en HP',fmt(P/745.7)+' HP']]}}});
+
+/* ---- Corriente ---- */
+add({id:'corriente',cat:'principales',ab:'I',name:'Corriente de una carga',desc:'Calcula la corriente a partir de la potencia.',kw:'amperios amperaje carga',
+ inputs:[{id:'sis',l:'Sistema',t:'sel',o:O_SIS,d:'3f'},{id:'P',l:'Potencia',d:'10'},{id:'pu',l:'Unidad',t:'sel',o:[['kW','kW (eléctrica)'],['W','W (eléctrica)'],['kVA','kVA'],['HP','HP (mecánica, motor)'],['CV','CV (mecánica, motor)']],d:'kW'},
+  {id:'V',l:'Tensión (línea-línea en trifásico)',u:'V',d:'220'},{id:'fp',l:'Factor de potencia',d:'0.9',show:v=>v.sis!=='cc'&&v.pu!=='kVA'},{id:'ef',l:'Eficiencia',u:'%',d:'90',show:v=>v.pu==='HP'||v.pu==='CV'}],
+ calc(v){const k=v.sis==='3f'?SQ3:1;const fp=(v.sis==='cc'||v.pu==='kVA')?1:v.fp;let P;
+  switch(v.pu){case'W':P=v.P;break;case'kW':P=v.P*1000;break;case'kVA':P=v.P*1000;break;case'HP':P=v.P*745.7/(v.ef/100);break;case'CV':P=v.P*735.5/(v.ef/100);break}
+  const I=P/(k*v.V*fp);const rows=[['Corriente',fmt(I)+' A','main']];
+  if(v.pu!=='kVA'&&v.sis!=='cc')rows.push(['Potencia aparente',fmt(P/fp/1000)+' kVA']);
+  if(v.pu==='HP'||v.pu==='CV')rows.push(['Potencia eléctrica absorbida',fmt(P/1000)+' kW']);
+  rows.push(['Corriente × 125 % (carga continua)',fmt(I*1.25)+' A']);return {rows}}});
+
+/* ---- Caída de tensión ---- */
+function vdrop(sis,mat,idx,I,L,V,fp,par,T){const R=rho(mat,T)/MM2[idx]/par;const X=XL_KM/1000/par;const c=sis==='cc'?1:fp;const s=sis==='cc'?0:Math.sqrt(1-c*c);
+ const k=sis==='3f'?SQ3:2;const dV=k*I*L*(R*c+X*s);return {dV,pct:dV/V*100,R,loss:(sis==='3f'?3:2)*I*I*R*L}}
+add({id:'caida',cat:'principales',ab:'ΔV',name:'Caída de tensión',desc:'Caída de tensión en un conductor según calibre, longitud y corriente.',kw:'caida voltaje perdida conductor cable distancia',
+ inputs:[{id:'sis',l:'Sistema',t:'sel',o:O_SIS,d:'1f'},{id:'mat',l:'Material',t:'sel',o:O_MAT,d:'cu'},{id:'sz',l:'Calibre',t:'sel',o:O_SIZE,d:'2'},
+  {id:'I',l:'Corriente',u:'A',d:'20'},{id:'L',l:'Longitud (un sentido)',u:'m',d:'50'},{id:'V',l:'Tensión nominal',u:'V',d:'240'},
+  {id:'fp',l:'Factor de potencia',d:'0.9',show:v=>v.sis!=='cc'},{id:'par',l:'Conductores en paralelo por fase',d:'1'},{id:'T',l:'Temperatura del conductor',u:'°C',d:'75'}],
+ calc(v){const i=+v.sz;if(v.mat==='al'&&i===0)return {error:'El 14 AWG no se usa en aluminio.'};
+  const r=vdrop(v.sis,v.mat,i,v.I,v.L,v.V,v.fp,v.par||1,v.T);const cls=r.pct<=3?'ok':r.pct<=5?'warn':'bad';
+  return {rows:[['Caída de tensión',fmt(r.dV)+' V','main'],['Caída porcentual',fmt(r.pct)+' %','main '+cls],['Tensión en la carga',fmt(v.V-r.dV)+' V'],['Pérdida de potencia',fmt(r.loss)+' W'],['Resistencia del conductor',fmt(r.R*1000,4)+' Ω/km']],
+   note:'Recomendación NEC 210.19 / 215.2: máximo 3 % en el circuito ramal o alimentador y 5 % en total. Incluye reactancia típica de 0,08 Ω/km.'}}});
+
+/* ---- Selección de calibre ---- */
+add({id:'calibre',cat:'principales',ab:'mm²',name:'Calibre del conductor',desc:'Selecciona el calibre por ampacidad (NEC 310.16) y por caída de tensión, y sugiere la protección.',kw:'seccion cable conductor dimensionar awg ampacidad',
+ inputs:[{id:'sis',l:'Sistema',t:'sel',o:O_SIS,d:'1f'},{id:'V',l:'Tensión',u:'V',d:'240'},{id:'I',l:'Corriente de la carga',u:'A',d:'40'},{id:'cont',l:'¿Carga continua (3 h o más)?',t:'sel',o:O_YN,d:'si'},
+  {id:'L',l:'Longitud (un sentido)',u:'m',d:'40'},{id:'max',l:'Caída máxima permitida',u:'%',d:'3'},{id:'mat',l:'Material',t:'sel',o:O_MAT,d:'cu'},
+  {id:'ti',l:'Temperatura de aislamiento',t:'sel',o:O_TINS,d:'75'},{id:'amb',l:'Temperatura ambiente',u:'°C',d:'30'},{id:'n',l:'Conductores portadores en la canalización',d:'3'},
+  {id:'fp',l:'Factor de potencia',d:'0.9',show:v=>v.sis!=='cc'}],
+ calc(v){const Id=v.I*(v.cont==='si'?1.25:1);const col={60:0,75:1,90:2}[v.ti];const ft=fTemp(v.amb,+v.ti),fg=fGroup(v.n);
+  if(!ft)return {error:'La temperatura ambiente excede el límite del aislamiento.'};const tbl=v.mat==='cu'?AMP_CU:AMP_AL;
+  let ia=-1,iv=-1;for(let i=0;i<SIZES.length;i++){if(!tbl[i])continue;const a=tbl[i][col]*ft*fg;const lim=SMALLMAX[v.mat][i];if(ia<0&&a>=Id&&(!lim||lim>=Id))ia=i;
+   if(iv<0&&vdrop(v.sis,v.mat,i,v.I,v.L,v.V,v.fp,1,75).pct<=v.max)iv=i}
+  if(ia<0)return {error:'Corriente fuera del rango de la tabla; use conductores en paralelo.'};
+  const sel=Math.max(ia,iv<0?99:iv);if(sel>=SIZES.length)return {error:'La caída de tensión exige más de 750 kcmil; use conductores en paralelo o reduzca la longitud.'};
+  const amp=tbl[sel][col]*ft*fg;const vd=vdrop(v.sis,v.mat,sel,v.I,v.L,v.V,v.fp,1,75);let brk=nextBrk(Id);
+  const lim=SMALLMAX[v.mat][sel];
+  return {rows:[['Calibre recomendado',SZL(sel)+' '+(v.mat==='cu'?'Cu':'Al'),'main'],['Sección',fmt(MM2[sel])+' mm²'],['Corriente de diseño',fmt(Id)+' A'],
+   ['Por ampacidad',SZL(ia)],['Por caída de tensión',iv<0?'> 750 kcmil':SZL(iv)],['Ampacidad corregida',fmt(amp)+' A'],['Factores (temp. × agrup.)',fmt(ft)+' × '+fmt(fg)],
+   ['Caída con este calibre',fmt(vd.pct)+' %',vd.pct<=v.max?'ok':'bad'],['Interruptor sugerido',brk+' A'+(lim?' (máx. '+lim+' A por 240.4(D))':'')]],
+   note:'Ampacidades según NEC Tabla 310.16 (conductores aislados en canalización, 30 °C), base del Código de Instalaciones Eléctricas de Nicaragua. Verifique la temperatura de las terminales del equipo (normalmente 75 °C) y la norma vigente.'}}});
+
+/* ---- Longitud máxima ---- */
+add({id:'longitud',cat:'principales',ab:'L',name:'Longitud máxima del conductor',desc:'Distancia máxima para no superar la caída de tensión permitida.',kw:'distancia maxima caida',
+ inputs:[{id:'sis',l:'Sistema',t:'sel',o:O_SIS,d:'1f'},{id:'mat',l:'Material',t:'sel',o:O_MAT,d:'cu'},{id:'sz',l:'Calibre',t:'sel',o:O_SIZE,d:'2'},{id:'I',l:'Corriente',u:'A',d:'20'},
+  {id:'V',l:'Tensión',u:'V',d:'240'},{id:'max',l:'Caída máxima',u:'%',d:'3'},{id:'fp',l:'Factor de potencia',d:'0.9',show:v=>v.sis!=='cc'}],
+ calc(v){const r=vdrop(v.sis,v.mat,+v.sz,v.I,1,v.V,v.fp,1,75);const L=(v.max/100*v.V)/r.dV;return {rows:[['Longitud máxima',fmt(L,1)+' m','main'],['Equivalente',fmt(L/0.3048,0)+' pies'],['Caída permitida',fmt(v.max/100*v.V)+' V']]}}});
+
+/* ---- Ampacidad ---- */
+add({id:'ampacidad',cat:'principales',ab:'A',name:'Ampacidad corregida',desc:'Capacidad de corriente con factores por temperatura y agrupamiento.',kw:'capacidad corriente cable factor correccion',
+ inputs:[{id:'mat',l:'Material',t:'sel',o:O_MAT,d:'cu'},{id:'sz',l:'Calibre',t:'sel',o:O_SIZE,d:'2'},{id:'ti',l:'Temperatura de aislamiento',t:'sel',o:O_TINS,d:'90'},
+  {id:'amb',l:'Temperatura ambiente',u:'°C',d:'35'},{id:'n',l:'Conductores portadores en la canalización',d:'6'}],
+ calc(v){const t=(v.mat==='cu'?AMP_CU:AMP_AL)[+v.sz];if(!t)return {error:'Calibre no disponible en aluminio.'};const col={60:0,75:1,90:2}[v.ti];
+  const ft=fTemp(v.amb,+v.ti),fg=fGroup(v.n);const a=t[col]*ft*fg;
+  return {rows:[['Ampacidad corregida',fmt(a,1)+' A','main'],['Ampacidad base ('+v.ti+' °C)',t[col]+' A'],['Factor por temperatura',fmt(ft)],['Factor por agrupamiento',fmt(fg)],['Límite a 75 °C (terminales)',t[1]+' A']],
+   note:'Con aislamiento de 90 °C puede aplicar los factores a la columna de 90 °C, pero el resultado no debe superar la ampacidad de la columna de temperatura de las terminales (NEC 110.14(C)).'}}});
+
+/* ---- Interruptor ---- */
+add({id:'interruptor',cat:'principales',ab:'BR',name:'Interruptor termomagnético',desc:'Selecciona el tamaño normalizado del breaker (NEC 240.6).',kw:'breaker proteccion disyuntor',
+ inputs:[{id:'I',l:'Corriente de la carga',u:'A',d:'32'},{id:'cont',l:'¿Carga continua?',t:'sel',o:O_YN,d:'si'}],
+ calc(v){const Id=v.I*(v.cont==='si'?1.25:1);return {rows:[['Interruptor normalizado',nextBrk(Id)+' A','main'],['Corriente de diseño',fmt(Id)+' A']],note:'Carga continua: 125 % de la corriente (NEC 210.20). El conductor debe tener ampacidad igual o mayor a la del interruptor.'}}});
+
+/* ---- Corrección FP ---- */
+add({id:'fp',cat:'principales',ab:'cosφ',name:'Corrección del factor de potencia',desc:'kVAR y capacitancia del banco de capacitores.',kw:'capacitores banco kvar factor potencia',
+ inputs:[{id:'P',l:'Potencia activa',u:'kW',d:'100'},{id:'f1',l:'FP actual',d:'0.78'},{id:'f2',l:'FP deseado',d:'0.95'},{id:'sis',l:'Sistema',t:'sel',o:O_SIS_AC,d:'3f'},{id:'V',l:'Tensión (línea-línea)',u:'V',d:'480'},{id:'f',l:'Frecuencia',u:'Hz',d:'60'}],
+ calc(v){if(!(v.f1>0&&v.f1<v.f2&&v.f2<=1))return {error:'El FP deseado debe ser mayor que el actual y menor o igual a 1.'};
+  const Q=v.P*(Math.tan(Math.acos(v.f1))-Math.tan(Math.acos(v.f2)));const w=2*Math.PI*v.f;
+  const C=v.sis==='3f'?Q*1000/(3*w*v.V*v.V):Q*1000/(w*v.V*v.V);const k=v.sis==='3f'?SQ3:1;
+  const I1=v.P*1000/(k*v.V*v.f1),I2=v.P*1000/(k*v.V*v.f2);
+  return {rows:[['Banco de capacitores',fmt(Q)+' kVAR','main'],[v.sis==='3f'?'Capacitancia por fase (Δ)':'Capacitancia',fmt(C*1e6)+' µF'],['Corriente antes',fmt(I1)+' A'],['Corriente después',fmt(I2)+' A'],['Reducción de corriente',fmt((1-I2/I1)*100,1)+' %'],['kVA antes / después',fmt(v.P/v.f1)+' / '+fmt(v.P/v.f2)]]}}});
+
+/* ---- Transformador ---- */
+add({id:'trafo',cat:'principales',ab:'TR',name:'Transformador: corrientes y cortocircuito',desc:'Corrientes nominales, corriente de cortocircuito en el secundario y protecciones.',kw:'transformador kva primario secundario impedancia cortocircuito',
+ inputs:[{id:'sis',l:'Sistema',t:'sel',o:O_SIS_AC,d:'3f'},{id:'S',l:'Potencia',u:'kVA',d:'75'},{id:'Vp',l:'Tensión primaria',u:'V',d:'13200'},{id:'Vs',l:'Tensión secundaria',u:'V',d:'208'},{id:'Z',l:'Impedancia',u:'%',d:'3.5'}],
+ calc(v){const k=v.sis==='3f'?SQ3:1;const Ip=v.S*1000/(k*v.Vp),Is=v.S*1000/(k*v.Vs);const Icc=Is*100/v.Z;
+  return {rows:[['Corriente primaria',fmt(Ip)+' A','main'],['Corriente secundaria',fmt(Is)+' A','main'],['Cortocircuito en bornes secundarios',fmt(Icc/1000,2)+' kA'],['Relación de transformación',fmt(v.Vp/v.Vs)],
+   ['Protección secundario (125 %)',nextBrk(Is*1.25)+' A'],['Protección primario (125 %)',fmt(Ip*1.25)+' A']],note:'Cortocircuito con fuente infinita (caso más desfavorable). Protecciones según NEC 450.3(B); ajuste fusibles de media tensión según la curva del fabricante y la distribuidora.'}}});
+
+add({id:'trafo-dim',cat:'principales',ab:'kVA',name:'Dimensionar transformador',desc:'Capacidad requerida y tamaño comercial a partir de la carga.',kw:'transformador capacidad tamaño',
+ inputs:[{id:'sis',l:'Sistema',t:'sel',o:O_SIS_AC,d:'3f'},{id:'P',l:'Carga total',u:'kW',d:'60'},{id:'fp',l:'Factor de potencia',d:'0.9'},{id:'fd',l:'Factor de demanda',u:'%',d:'100'},{id:'res',l:'Reserva para crecimiento',u:'%',d:'25'}],
+ calc(v){const S=v.P*(v.fd/100)/v.fp*(1+v.res/100);const list=v.sis==='3f'?TR3:TR1;const st=list.find(x=>x>=S);
+  return {rows:[['kVA requeridos',fmt(S)+' kVA'],['Tamaño comercial',st?fmt(st)+' kVA':'> '+list[list.length-1]+' kVA','main'],['Cargabilidad resultante',st?fmt(v.P*(v.fd/100)/v.fp/st*100,1)+' %':'—']]}}});
+
+/* ---- Resistencia del conductor ---- */
+add({id:'rcond',cat:'principales',ab:'R',name:'Resistencia de un conductor',desc:'Resistencia según material, sección, longitud y temperatura.',kw:'resistencia cable ohm',
+ inputs:[{id:'mat',l:'Material',t:'sel',o:O_MAT,d:'cu'},{id:'sz',l:'Calibre',t:'sel',o:O_SIZE,d:'2'},{id:'L',l:'Longitud',u:'m',d:'100'},{id:'T',l:'Temperatura',u:'°C',d:'75'}],
+ calc(v){const R=rho(v.mat,v.T)*v.L/MM2[+v.sz];return {rows:[['Resistencia',si(R,'Ω'),'main'],['Por kilómetro',fmt(rho(v.mat,v.T)/MM2[+v.sz]*1000,4)+' Ω/km'],['Resistividad a '+v.T+' °C',fmt(rho(v.mat,v.T),5)+' Ω·mm²/m']]}}});
+
+/* ---- Puesta a tierra ---- */
+add({id:'tierra',cat:'principales',ab:'⏚',name:'Resistencia de puesta a tierra',desc:'Resistencia de una varilla vertical (fórmula de Dwight) y de varillas en paralelo.',kw:'tierra varilla electrodo resistividad',
+ inputs:[{id:'rho',l:'Resistividad del terreno',u:'Ω·m',d:'100'},{id:'L',l:'Longitud de la varilla',u:'m',d:'2.44'},{id:'d',l:'Diámetro de la varilla',u:'mm',d:'15.9'},{id:'n',l:'Número de varillas',d:'1'},{id:'s',l:'Separación entre varillas',u:'m',d:'4.88',show:v=>v.n>1}],
+ calc(v){const a=v.d/2000;const R1=v.rho/(2*Math.PI*v.L)*(Math.log(4*v.L/a)-1);let Rn=R1;
+  if(v.n>1){const n=v.n;const Fm={2:1.16,3:1.29,4:1.36,5:1.4,6:1.43,8:1.48,10:1.52};let F=1.52;for(const k of Object.keys(Fm).map(Number))if(n<=k){F=Fm[k];break}
+   Rn=R1/n*F*(v.s>=2*v.L?1:1.1)}
+  return {rows:[['Resistencia de una varilla',fmt(R1)+' Ω',v.n>1?'':'main'],...(v.n>1?[['Resistencia del sistema ('+v.n+' varillas)',fmt(Rn)+' Ω','main']]:[]),['Cumple ≤ 25 Ω (NEC 250.53)',Rn<=25?'Sí':'No',Rn<=25?'ok':'bad']],
+   note:'Varilla típica: 5/8" × 8 pies (15,9 mm × 2,44 m). Varillas en paralelo con factor de multiplicación aproximado (separación ≥ longitud de la varilla). Para equipos sensibles suele exigirse ≤ 5 Ω.'}}});
+
+/* ---- Tubería ---- */
+const O_TSZ=[['-','—'],...O_SIZE.slice(0,18)];
+add({id:'tuberia',cat:'principales',ab:'⌀',name:'Llenado de tubería',desc:'Diámetro mínimo de tubería para conductores THHN/THWN-2 (NEC Cap. 9).',kw:'conduit canalizacion emt pvc tubo diametro',
+ inputs:[{id:'tp',l:'Tipo de tubería',t:'sel',o:[['emt','EMT (metálica)'],['pvc','PVC cédula 40']],d:'emt'},
+  {id:'s1',l:'Calibre grupo 1',t:'sel',o:O_TSZ,d:'4'},{id:'n1',l:'Cantidad grupo 1',d:'3'},{id:'s2',l:'Calibre grupo 2',t:'sel',o:O_TSZ,d:'6'},{id:'n2',l:'Cantidad grupo 2',d:'1'},
+  {id:'s3',l:'Calibre grupo 3',t:'sel',o:O_TSZ,d:'-'},{id:'n3',l:'Cantidad grupo 3',d:'0'}],
+ calc(v){let A=0,N=0;[['s1','n1'],['s2','n2'],['s3','n3']].forEach(([s,n])=>{if(v[s]!=='-'&&v[n]>0){A+=THHN[+v[s]]*v[n];N+=v[n]}});
+  if(!N)return {error:'Agregue al menos un conductor.'};const lim=N===1?0.53:N===2?0.31:0.40;const T=v.tp==='emt'?EMT:PVC;const p=T.find(x=>x[1]*lim>=A);
+  return {rows:[['Tubería mínima',p?p[0]:'Mayor de 4"','main'],['Área de conductores',fmt(A*IN2,0)+' mm²'],['Conductores',N],['Llenado máximo permitido',lim*100+' %'],['Llenado real',p?fmt(A/p[1]*100,1)+' %':'—']],note:'Áreas de conductor THHN/THWN-2 (NEC Tabla 5) y de tubería (NEC Tabla 4).'}}});
+
+/* ---- Iluminación ---- */
+add({id:'iluminacion',cat:'principales',ab:'lx',name:'Iluminación (método de lúmenes)',desc:'Número de luminarias para un nivel de iluminación.',kw:'luminarias lux lumenes alumbrado lamparas',
+ inputs:[{id:'a',l:'Largo del local',u:'m',d:'10'},{id:'b',l:'Ancho del local',u:'m',d:'8'},{id:'E',l:'Nivel de iluminación',u:'lx',d:'500',h:'Oficina 500 · Aula 300 · Taller 300–500 · Bodega 150–200 · Pasillo 100'},
+  {id:'lm',l:'Lúmenes por luminaria',u:'lm',d:'4000'},{id:'w',l:'Potencia por luminaria',u:'W',d:'36'},{id:'cu',l:'Coeficiente de utilización',d:'0.6'},{id:'fm',l:'Factor de mantenimiento',d:'0.8'}],
+ calc(v){const A=v.a*v.b;const F=v.E*A/(v.cu*v.fm);const N=Math.ceil(F/v.lm-1e-9);
+  return {rows:[['Luminarias necesarias',N,'main'],['Flujo total requerido',fmt(F,0)+' lm'],['Área',fmt(A)+' m²'],['Potencia instalada',fmt(N*v.w,0)+' W'],['Densidad de potencia',fmt(N*v.w/A,1)+' W/m²'],['Nivel resultante',fmt(N*v.lm*v.cu*v.fm/A,0)+' lx']]}}});
+
+/* ---- Energía y costo ---- */
+add({id:'energia',cat:'principales',ab:'kWh',name:'Consumo y costo de energía',desc:'Energía diaria y mensual y costo según la tarifa.',kw:'consumo kwh factura tarifa costo',
+ inputs:[{id:'P',l:'Potencia del equipo',u:'W',d:'1500'},{id:'n',l:'Cantidad de equipos',d:'1'},{id:'h',l:'Horas de uso por día',u:'h',d:'8'},{id:'d',l:'Días al mes',d:'30'},{id:'t',l:'Tarifa',u:'C$/kWh',d:'7.5'}],
+ calc(v){const Ed=v.P*v.n*v.h/1000,Em=Ed*v.d;return {rows:[['Consumo mensual',fmt(Em)+' kWh','main'],['Costo mensual','C$ '+fmt(Em*v.t,2),'main'],['Consumo diario',fmt(Ed)+' kWh'],['Costo anual','C$ '+fmt(Em*v.t*12,2)]],note:'Tarifa de referencia; use la de su factura (incluye cargos e IVA según el pliego tarifario vigente).'}}});
+
+/* ---- Baterías / UPS ---- */
+add({id:'bateria',cat:'principales',ab:'Ah',name:'Autonomía de baterías / UPS',desc:'Tiempo de respaldo de un banco de baterías y tiempo de carga.',kw:'ups respaldo autonomia inversor carga',
+ inputs:[{id:'V',l:'Tensión del banco',u:'V',d:'24'},{id:'Ah',l:'Capacidad del banco',u:'Ah',d:'200'},{id:'P',l:'Carga conectada',u:'W',d:'800'},{id:'dod',l:'Profundidad de descarga',u:'%',d:'50',h:'Plomo-ácido 50 % · Litio (LiFePO₄) 80–90 %'},
+  {id:'ef',l:'Eficiencia del inversor',u:'%',d:'90'},{id:'Ic',l:'Corriente del cargador',u:'A',d:'20'}],
+ calc(v){const E=v.V*v.Ah*v.dod/100*v.ef/100;const t=E/v.P;const tc=v.Ah*v.dod/100/v.Ic/0.85;
+  return {rows:[['Autonomía',fmt(t)+' h','main'],['En minutos',fmt(t*60,0)+' min'],['Energía útil',fmt(E,0)+' Wh'],['Corriente de descarga (CC)',fmt(v.P/(v.ef/100)/v.V)+' A'],['Tiempo de recarga aprox.',fmt(tc,1)+' h']],note:'A corrientes de descarga altas la capacidad real de las baterías de plomo es menor (efecto Peukert).'}}});
+
+/* ---- Fotovoltaico ---- */
+add({id:'solar',cat:'principales',ab:'FV',name:'Sistema fotovoltaico aislado',desc:'Paneles, banco de baterías y controlador de carga.',kw:'solar paneles fotovoltaico baterias controlador',
+ inputs:[{id:'E',l:'Consumo diario',u:'Wh/día',d:'3000'},{id:'hsp',l:'Horas solares pico',u:'h',d:'5',h:'Nicaragua: aprox. 4,5 a 5,5 HSP'},{id:'Wp',l:'Potencia del panel',u:'Wp',d:'550'},
+  {id:'perd',l:'Pérdidas del sistema',u:'%',d:'25'},{id:'Vs',l:'Tensión del sistema',t:'sel',o:[['12','12 V'],['24','24 V'],['48','48 V']],d:'24'},{id:'dias',l:'Días de autonomía',d:'1'},{id:'dod',l:'Profundidad de descarga',u:'%',d:'50'}],
+ calc(v){const Ereq=v.E/(1-v.perd/100);const N=Math.ceil(Ereq/(v.Wp*v.hsp)-1e-9);const Ah=v.E*v.dias/(v.Vs*v.dod/100);const Ictrl=N*v.Wp/v.Vs*1.25;
+  return {rows:[['Paneles necesarios',N+' × '+v.Wp+' Wp','main'],['Potencia del arreglo',fmt(N*v.Wp,0)+' Wp'],['Banco de baterías',fmt(Ah,0)+' Ah @ '+v.Vs+' V','main'],['Controlador de carga (MPPT)',fmt(Ictrl,0)+' A mín.'],['Energía generada estimada',fmt(N*v.Wp*v.hsp*(1-v.perd/100),0)+' Wh/día']],
+   note:'Controlador estimado como potencia del arreglo / tensión de baterías × 1,25. Verifique la Voc del arreglo contra la tensión máxima del controlador.'}}});
+
+/* ---- Reactancias ---- */
+add({id:'reactancia',cat:'principales',ab:'X',name:'Reactancias y resonancia',desc:'Reactancia inductiva, capacitiva y frecuencia de resonancia.',kw:'inductiva capacitiva xl xc resonancia',
+ inputs:[{id:'f',l:'Frecuencia',u:'Hz',d:'60'},{id:'L',l:'Inductancia',u:'mH',d:'10',opt:1},{id:'C',l:'Capacitancia',u:'µF',d:'100',opt:1}],
+ calc(v){const w=2*Math.PI*v.f;const r=[];if(isFinite(v.L))r.push(['Reactancia inductiva XL',si(w*v.L/1000,'Ω')]);if(isFinite(v.C))r.push(['Reactancia capacitiva XC',si(1/(w*v.C*1e-6),'Ω')]);
+  if(isFinite(v.L)&&isFinite(v.C))r.push(['Frecuencia de resonancia',si(1/(2*Math.PI*Math.sqrt(v.L/1000*v.C*1e-6)),'Hz'),'main']);if(!r.length)return {error:'Ingrese L o C.'};return {rows:r}}});
+
+add({id:'rlc',cat:'principales',ab:'Z',name:'Impedancia de circuito RLC',desc:'Impedancia, ángulo y corriente de un circuito R-L-C en serie o en paralelo.',kw:'impedancia rlc serie paralelo',
+ inputs:[{id:'cx',l:'Conexión',t:'sel',o:[['s','Serie'],['p','Paralelo']],d:'s'},{id:'R',l:'Resistencia',u:'Ω',d:'10'},{id:'L',l:'Inductancia',u:'mH',d:'50'},{id:'C',l:'Capacitancia',u:'µF',d:'200'},{id:'f',l:'Frecuencia',u:'Hz',d:'60'},{id:'V',l:'Tensión',u:'V',d:'120'}],
+ calc(v){const w=2*Math.PI*v.f;const XL=w*v.L/1000,XC=v.C>0?1/(w*v.C*1e-6):0;let Zr,Zi;
+  if(v.cx==='s'){Zr=v.R;Zi=XL-XC}else{let Gr=v.R>0?1/v.R:0;let B=(XL>0?-1/XL:0)+(XC>0?1/XC:0);const d=Gr*Gr+B*B;Zr=Gr/d;Zi=-B/d}
+  const Z=Math.hypot(Zr,Zi),ph=Math.atan2(Zi,Zr)*180/Math.PI;
+  return {rows:[['Impedancia |Z|',si(Z,'Ω'),'main'],['Ángulo',fmt(ph,1)+'° '+(ph>0.05?'(inductivo)':ph<-0.05?'(capacitivo)':'(resistivo)')],['Corriente',si(v.V/Z,'A')],['Factor de potencia',fmt(Math.abs(Math.cos(ph*Math.PI/180)),3)],['XL / XC',si(XL,'Ω')+' / '+si(XC,'Ω')]]}}});
+
+add({id:'estrella-triangulo',cat:'principales',ab:'Y∆',name:'Conversión estrella ↔ triángulo',desc:'Transforma impedancias entre conexión en estrella (Y) y en triángulo (Δ).',kw:'kennelly estrella triangulo delta',
+ inputs:[{id:'m',l:'Conversión',t:'sel',o:[['dy','Triángulo → Estrella'],['yd','Estrella → Triángulo']],d:'dy'},{id:'a',l:'Ra (Rab / R1)',u:'Ω',d:'30'},{id:'b',l:'Rb (Rbc / R2)',u:'Ω',d:'30'},{id:'c',l:'Rc (Rca / R3)',u:'Ω',d:'30'}],
+ calc(v){const {a,b,c}=v;if(v.m==='dy'){const s=a+b+c;return {rows:[['R1 (nodo a)',si(a*c/s,'Ω')],['R2 (nodo b)',si(a*b/s,'Ω')],['R3 (nodo c)',si(b*c/s,'Ω')]],note:'Entradas: Rab, Rbc, Rca del triángulo.'}}
+  const p=a*b+b*c+c*a;return {rows:[['Rab',si(p/c,'Ω')],['Rbc',si(p/a,'Ω')],['Rca',si(p/b,'Ω')]],note:'Entradas: R1, R2, R3 de la estrella (nodos a, b, c).'}}});
+
+/* ---- Identificador de sistema (analizador de redes) ---- */
+const NOM_LL=[208,220,240,380,400,415,440,460,480,600,2400,4160,13200,13800,24900,34500];
+function nomOf(x){let b=NOM_LL[0];NOM_LL.forEach(n=>{if(Math.abs(x/n-1)<Math.abs(x/b-1))b=n});return b}
+add({id:'identificar-sistema',cat:'proyectos',ab:'🔍',name:'Identificar sistema y conexión (analizador de redes)',desc:'Ingrese las tensiones medidas en el panel: indica si es monofásico o trifásico, la conexión y cómo configurar el analizador.',kw:'analizador redes fluke hioki estudio calidad energia panel tablero identificar sistema conexion estrella delta fase alta monofasico trifasico 3p4w 3p3w 1p3w',
+ inputs:[{id:'ab',l:'Tensión L1 – L2',u:'V',opt:1,d:'208'},{id:'bc',l:'Tensión L2 – L3',u:'V',opt:1,d:'209'},{id:'ca',l:'Tensión L3 – L1',u:'V',opt:1,d:'207'},
+  {id:'an',l:'Tensión L1 – N',u:'V',opt:1,d:'120'},{id:'bn',l:'Tensión L2 – N',u:'V',opt:1,d:'121'},{id:'cn',l:'Tensión L3 – N',u:'V',opt:1,d:'119'},
+  {id:'ng',l:'Tensión Neutro – Tierra (opcional)',u:'V',opt:1,d:'',h:'Deje en blanco las tensiones que no existan en el panel (ej. sin neutro o sin L3).'}],
+ calc(v){const LL=[['L1-L2',v.ab],['L2-L3',v.bc],['L3-L1',v.ca]].filter(x=>isFinite(x[1])&&x[1]>0);const LN=[['L1',v.an],['L2',v.bn],['L3',v.cn]].filter(x=>isFinite(x[1]));
+  const avg=a=>a.reduce((s,x)=>s+x[1],0)/a.length;const unb=a=>{const m=avg(a);return Math.max(...a.map(x=>Math.abs(x[1]-m)))/m*100};const near=(x,t,tol)=>Math.abs(x/t-1)<=(tol||0.08);
+  let tipo,con,nom,anz,puntas,trafo,extra=[],nota='';
+  if(LL.length===3){const m=avg(LL);const N=nomOf(m);
+   if(LN.length===3){const r=LN.map(x=>x[1]/m);
+    if(r.every(x=>near(x,1/SQ3,0.1))){tipo='Trifásico 4 hilos';con='Estrella (Y) con neutro';nom=Math.round(N/SQ3)+'/'+N+' V';anz='3Ø WYE · 3P4W (estrella)';puntas='4 puntas de tensión (L1, L2, L3, N) + tierra; 3 pinzas de corriente (+1 en el neutro si el equipo lo permite)';trafo='Secundario en estrella con neutro: Dyn1/Dyn11, Yyn0 o banco de 3 monofásicos en Y';extra.push(['Desbalance L-N',fmt(unb(LN),2)+' %',unb(LN)<=2?'ok':unb(LN)<=5?'warn':'bad'])}
+    else{const hi=r.findIndex(x=>near(x,SQ3/2,0.08));const lows=r.filter((x,i)=>i!==hi&&near(x,0.5,0.1));
+     if(hi>=0&&lows.length===2){tipo='Trifásico 4 hilos';con='Delta (Δ) con derivación central — fase alta en '+LN[hi][0];nom=Math.round(N/2)+'/'+N+' V Δ';anz='3Ø HIGH LEG · 3P4W Delta (delta 4 hilos)';puntas='4 puntas de tensión (L1, L2, L3, N); 3 pinzas de corriente. Coloque la fase alta en la entrada que el analizador indique (normalmente L2/B)';trafo='Banco delta con derivación central (3 unidades) o delta abierto (2 unidades)';extra.push(['Fase alta (≈ '+fmt(N*SQ3/2,0)+' V a N)',LN[hi][0]+' = '+fmt(LN[hi][1],1)+' V','warn']);nota='¡Precaución! La fase alta no debe usarse para cargas de 120 V.'}
+     else if(r.filter(x=>x<0.1).length===1&&r.filter(x=>near(x,1,0.1)).length===2){tipo='Trifásico 3 hilos';con='Delta con una esquina aterrizada ('+LN[r.findIndex(x=>x<0.1)][0]+' a tierra)';nom=N+' V Δ';anz='3Ø DELTA · 3P3W';puntas='3 puntas de tensión (L1, L2, L3); 3 pinzas de corriente (o 2 en modo Aron)';trafo='Secundario en delta con una fase conectada a tierra'}
+     else{tipo='No concluyente';con='Las tensiones L-N no corresponden a un sistema estándar';nom='—';anz='Revise las mediciones';puntas='—';trafo='—';nota='Posible neutro flotante o abierto, desbalance severo o error de medición. Verifique el neutro y la tensión neutro-tierra.'}}}
+   else{tipo='Trifásico 3 hilos';con='Delta (Δ) o estrella sin neutro';nom=N+' V';anz='3Ø DELTA · 3P3W (o 2 elementos / Aron)';puntas='3 puntas de tensión (L1, L2, L3); 3 pinzas de corriente (2 en modo Aron)';trafo='Secundario en delta (Dd0, Yd) o estrella sin neutro distribuido';
+    if(LN.length)nota='Para confirmar si es delta con fase alta o estrella, ingrese las 3 tensiones L-N (o L-tierra).'}
+   const ll=unb(LL);extra.unshift(['Desbalance de tensión L-L',fmt(ll,2)+' %',ll<=2?'ok':ll<=5?'warn':'bad']);extra.push(['Desviación de la nominal ('+N+' V)',fmt((m/N-1)*100,1)+' %',Math.abs(m/N-1)<=0.05?'ok':'bad'])}
+  else if(LL.length===1&&LN.length>=2){const n=avg(LN.slice(0,2));const r=LL[0][1]/n;
+   if(near(r,2,0.08)){tipo='Monofásico 3 hilos';con='Fase partida (split phase), fases a 180°';nom=Math.round(n/5)*5+'/'+Math.round(LL[0][1]/10)*10+' V';anz='1Ø SPLIT PHASE · 1P3W';puntas='3 puntas de tensión (L1, L2, N); 2 pinzas de corriente';trafo='Transformador monofásico con derivación central (X1 – X2 – X3)'}
+   else if(near(r,SQ3,0.08)){tipo='Bifásico de red trifásica (2 fases + neutro)';con='Dos fases de un sistema estrella, fases a 120°';nom=Math.round(n)+'/'+nomOf(LL[0][1])+' V';anz='3Ø WYE · 3P4W dejando L3 sin conectar (o modo 2P3W si su analizador lo tiene). No use “split phase”: el ángulo es 120°, no 180°';puntas='3 puntas de tensión (L1, L2, N); 2 pinzas de corriente';trafo='Acometida tomada de 2 fases de un banco o transformador en estrella'}
+   else{tipo='No concluyente';con='La relación L-L / L-N ('+fmt(r,2)+') no es 2 ni √3';nom='—';anz='Revise las mediciones';puntas='—';trafo='—'}
+   extra.push(['Desbalance L-N',fmt(unb(LN.slice(0,2)),2)+' %',unb(LN.slice(0,2))<=2?'ok':unb(LN.slice(0,2))<=5?'warn':'bad'])}
+  else if(LL.length===1&&LN.length===0){tipo='Monofásico 2 hilos';con='Fase – fase sin neutro';nom=Math.round(LL[0][1])+' V';anz='1Ø IT NO NEUTRAL · 1P2W (fase-fase)';puntas='2 puntas de tensión (L1, L2); 1 pinza de corriente';trafo='Monofásico sin derivación central o 2 fases de un sistema trifásico'}
+  else if(LL.length===0&&LN.length===1){tipo='Monofásico 2 hilos';con='Fase – neutro';nom=Math.round(LN[0][1])+' V';anz='1Ø + NEUTRAL · 1P2W';puntas='2 puntas de tensión (L, N); 1 pinza de corriente';trafo='Fase y neutro de cualquier sistema'}
+  else if(LL.length===2){return {error:'Mida la tercera tensión entre fases para identificar el sistema (con 2 tensiones L-L puede ser delta abierto o faltar una medición).'}}
+  else return {error:'Ingrese las tensiones medidas entre fases (L-L) y/o entre fase y neutro (L-N).'};
+  if(isFinite(v.ng)){extra.push(['Tensión neutro – tierra',fmt(v.ng,1)+' V',v.ng<=2?'ok':v.ng<=5?'warn':'bad']);if(v.ng>5)nota+=(nota?' ':'')+'Tensión N-T elevada: revise la unión neutro-tierra en el principal, neutros sobrecargados o con armónicos.'}
+  return {rows:[['Tipo de sistema',tipo,'main txt'],['Conexión',con,'main txt'],['Tensión nominal',nom,'txt'],['Configurar el analizador',anz,'main txt'],['Puntas y pinzas',puntas,'txt'],['Transformador probable',trafo,'txt'],...extra],
+   note:(nota?nota+' ':'')+'Desbalance según NEMA MG-1: > 1 % obliga a reducir la potencia de los motores; evite operar con más de 5 %. Rango A de ANSI C84.1: ±5 % de la nominal. Los nombres de modo son los de Fluke (434/435/1760); en Hioki o Dranetz se llaman 1P2W, 1P3W, 3P3W2M/3P3W3M y 3P4W.'}}});
+
+/* ============ PROYECTOS (aplicado a EEING) ============ */
+const parseLines=s=>String(s||'').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>l.split(/[;|\t]/).map(x=>x.trim()));
+
+add({id:'cuadro-cargas',cat:'proyectos',ab:'∑',name:'Cuadro de cargas de un panel',desc:'Suma las cargas, aplica factor de demanda y da corriente, breaker principal y conductor del alimentador.',kw:'cuadro cargas panel tablero demanda alimentador principal',
+ inputs:[{id:'sis',l:'Sistema',t:'sel',o:[['3f','Trifásico'],['1f','Monofásico']],d:'1f'},{id:'V',l:'Tensión (L-L)',u:'V',d:'240'},{id:'fp',l:'Factor de potencia',d:'0.9'},{id:'fd',l:'Factor de demanda',u:'%',d:'80'},{id:'cont',l:'¿Alimentador con carga continua?',t:'sel',o:O_YN,d:'si'},
+  {id:'L',l:'Cargas: descripción ; vatios ; cantidad (una por línea)',t:'area',d:'Iluminación LED; 40; 20\nTomacorrientes generales; 180; 16\nAire acondicionado 24 000 BTU; 2400; 2\nBomba 1 HP; 1100; 1\nComputadoras; 250; 6'}],
+ calc(v){const it=parseLines(v.L).map(r=>({n:r[0],w:num(r[1]),q:r.length>2?num(r[2]):1})).filter(r=>isFinite(r.w)&&isFinite(r.q));if(!it.length)return {error:'Escriba al menos una carga: nombre; vatios; cantidad.'};
+  const tot=it.reduce((s,r)=>s+r.w*r.q,0);const dem=tot*v.fd/100;const S=dem/v.fp;const k=v.sis==='3f'?SQ3:1;const I=S/(k*v.V);const Id=I*(v.cont==='si'?1.25:1);
+  const brk=nextBrk(Id);const ci=AMP_CU.findIndex((a,i)=>a[1]>=Id&&a[1]>=Math.min(brk,a[1]+1)&&(!SMALLMAX.cu[i]||SMALLMAX.cu[i]>=Id));
+  const html=T(['Carga','W','Cant.','Total W','%'],it.map(r=>[esc(r.n),r.w,r.q,r.w*r.q,+(r.w*r.q/tot*100).toFixed(1)]));
+  return {html,rows:[['Carga instalada',fmt(tot/1000)+' kW'],['Demanda máxima ('+v.fd+' %)',fmt(dem/1000)+' kW'],['Potencia aparente',fmt(S/1000)+' kVA'],['Corriente del alimentador',fmt(I)+' A','main'],
+   ['Interruptor principal',brk+' A','main'],['Conductor Cu 75 °C (por ampacidad)',ci>=0?SZL(ci):'Use conductores en paralelo']],
+   note:'Separe las cargas con punto y coma. Verifique la caída de tensión del alimentador con la herramienta “Calibre del conductor” y los factores de demanda del NEC Art. 220 según el tipo de local.'}}});
+
+add({id:'balance-fases',cat:'proyectos',ab:'⚖',name:'Balance de fases y corriente de neutro',desc:'Con las corrientes medidas por el analizador calcula el desbalance, la corriente de neutro y cuánta carga mover.',kw:'desbalance corriente neutro fases equilibrar analizador estudio',
+ inputs:[{id:'a',l:'Corriente fase L1',u:'A',d:'120'},{id:'b',l:'Corriente fase L2',u:'A',d:'85'},{id:'c',l:'Corriente fase L3',u:'A',d:'100'},{id:'h3',l:'3.er armónico (% de la fundamental)',u:'%',opt:1,d:''},{id:'V',l:'Tensión L-N',u:'V',d:'120'}],
+ calc(v){const {a,b,c}=v;const m=(a+b+c)/3;const dev=Math.max(Math.abs(a-m),Math.abs(b-m),Math.abs(c-m))/m*100;const In1=Math.sqrt(Math.max(a*a+b*b+c*c-a*b-b*c-c*a,0));
+  const In3=isFinite(v.h3)?(a+b+c)*v.h3/100:0;const In=Math.sqrt(In1*In1+In3*In3);const ph=[['L1',a],['L2',b],['L3',c]].sort((x,y)=>y[1]-x[1]);
+  const mov=ph[0][1]-m;return {rows:[['Desbalance de corriente',fmt(dev,1)+' %','main '+(dev<=10?'ok':dev<=20?'warn':'bad')],['Corriente promedio',fmt(m)+' A'],['Corriente de neutro (fundamental)',fmt(In1)+' A'],...(In3?[['Neutro por 3.er armónico',fmt(In3)+' A'],['Neutro total estimado',fmt(In)+' A','main']]:[]),
+   ['Mover de '+ph[0][0]+' a '+ph[2][0],'≈ '+fmt(mov)+' A ('+fmt(mov*v.V/1000,2)+' kW)'],['Fase más cargada / menos cargada',ph[0][0]+' / '+ph[2][0]]],
+   note:'Criterio práctico: desbalance de corriente ≤ 10 % bueno, hasta 20 % aceptable. El 3.er armónico y sus múltiplos se suman en el neutro: con cargas electrónicas (computadoras, LED, UPS) el neutro puede superar la corriente de fase.'}}});
+
+const AIC=[10,14,18,22,25,35,42,50,65,85,100,150,200];
+add({id:'cortocircuito-punto',cat:'proyectos',ab:'Icc',name:'Cortocircuito en un tablero',desc:'Corriente de cortocircuito al final de un alimentador y capacidad interruptiva mínima de los breakers.',kw:'cortocircuito icc kaic capacidad interruptiva breaker tablero',
+ inputs:[{id:'sis',l:'Sistema',t:'sel',o:O_SIS_AC,d:'3f'},{id:'S',l:'Transformador',u:'kVA',d:'150'},{id:'V',l:'Tensión secundaria (L-L)',u:'V',d:'208'},{id:'Z',l:'Impedancia del transformador',u:'%',d:'4'},
+  {id:'mat',l:'Material del alimentador',t:'sel',o:O_MAT,d:'cu'},{id:'sz',l:'Calibre del alimentador',t:'sel',o:O_SIZE,d:'13'},{id:'par',l:'Conductores por fase',d:'2'},{id:'L',l:'Longitud del alimentador',u:'m',d:'30'}],
+ calc(v){const k=v.sis==='3f'?SQ3:1;const Ifl=v.S*1000/(k*v.V);const Itr=Ifl*100/v.Z;const Zs=v.V/(k*Itr);const R=rho(v.mat,25)/MM2[+v.sz]*v.L/v.par,X=XL_KM/1000*v.L/v.par;
+  const loop=v.sis==='3f'?1:2;const Ipt=v.V/(k*Math.hypot(R*loop,Zs+X*loop));const aic=AIC.find(x=>x*1000>=Ipt);
+  return {rows:[['Icc en bornes del transformador',fmt(Itr/1000,2)+' kA'],['Icc en el tablero',fmt(Ipt/1000,2)+' kA','main'],['Capacidad interruptiva mínima',aic?aic+' kA':'> 200 kA','main'],['Reducción por el alimentador',fmt((1-Ipt/Itr)*100,1)+' %']],
+   note:'Fuente infinita en media tensión (caso más desfavorable); no incluye el aporte de motores, que puede sumar hasta 4 × la corriente de los motores en marcha. Los breakers deben tener capacidad interruptiva ≥ a la Icc del punto (NEC 110.9).'}}});
+
+const GEN_KW=[10,15,20,25,30,40,50,60,80,100,125,150,175,200,250,300,350,400,450,500,600,750,800,1000,1250,1500,2000];
+add({id:'planta-electrica',cat:'proyectos',ab:'GEN',name:'Planta eléctrica (generador)',desc:'Capacidad del generador considerando la carga en marcha y el arranque del motor más grande.',kw:'generador planta electrica emergencia kva dimensionamiento',
+ inputs:[{id:'P',l:'Carga total en marcha',u:'kW',d:'60'},{id:'fp',l:'Factor de potencia de la carga',d:'0.85'},{id:'hp',l:'Motor más grande',u:'HP',d:'15'},{id:'m',l:'Arranque del motor',t:'sel',o:[['6','Directo (DOL)'],['2.2','Estrella-triángulo'],['3','Arrancador suave'],['1.5','Variador de frecuencia']],d:'6'},{id:'res',l:'Reserva',u:'%',d:'20'}],
+ calc(v){const Srun=v.P/v.fp*(1+v.res/100);const Mk=v.hp*0.746/(0.88*0.85);const Sstart=(v.P/v.fp-Mk)+Mk*(+v.m);const Sreq2=Sstart/2.5;const S=Math.max(Srun,Sreq2);
+  const kw=GEN_KW.find(x=>x/0.8>=S);return {rows:[['kVA por carga continua',fmt(Srun)+' kVA'],['kVA por arranque del motor',fmt(Sreq2)+' kVA'],['Planta recomendada',kw?kw+' kW / '+fmt(kw/0.8,0)+' kVA (FP 0,8)':'> 2 000 kW','main'],['Criterio que manda',Srun>=Sreq2?'Carga continua':'Arranque del motor']],
+   note:'Estimación para caída de tensión ≈ 30 % durante el arranque y operación en régimen “standby/prime” al 80 % de carga. Confirme con el software del fabricante (Cummins, Caterpillar, Perkins) si hay muchos motores, variadores o cargas no lineales.'}}});
+
+const UPS_KVA=[1,1.5,2,3,6,10,15,20,30,40,60,80,100,120,160,200,300,400,500];
+add({id:'ups',cat:'proyectos',ab:'UPS',name:'Dimensionamiento de UPS',desc:'Capacidad de la UPS y del banco de baterías para una autonomía dada.',kw:'ups respaldo baterias autonomia laboratorio equipos sensibles',
+ inputs:[{id:'P',l:'Carga a respaldar',u:'W',d:'4500'},{id:'fp',l:'Factor de potencia de la carga',d:'0.9'},{id:'res',l:'Reserva para crecimiento',u:'%',d:'25'},{id:'t',l:'Autonomía requerida',u:'min',d:'15'},
+  {id:'Vb',l:'Tensión del banco de baterías',u:'V',d:'192',h:'Consulte el modelo de UPS (ej. 96, 192, 240, 384 V CC)'},{id:'ef',l:'Eficiencia del inversor',u:'%',d:'92'}],
+ calc(v){const S=v.P/v.fp*(1+v.res/100)/1000;const st=UPS_KVA.find(x=>x>=S);const E=v.P*v.t/60/(v.ef/100);const Ah=E/v.Vb/0.8;
+  return {rows:[['UPS recomendada',st?st+' kVA':'> 500 kVA','main'],['kVA requeridos',fmt(S)+' kVA'],['Cargabilidad de la UPS',st?fmt(v.P/v.fp/1000/st*100,0)+' %':'—'],['Energía de baterías',fmt(E,0)+' Wh'],['Banco de baterías aprox.',fmt(Ah,0)+' Ah @ '+v.Vb+' V'],['Baterías de 12 V en serie',Math.round(v.Vb/12)]],
+   note:'La capacidad real en Ah depende del tiempo de descarga: para autonomías cortas (< 30 min) use las tablas de potencia (W/celda) del fabricante. Para equipos de laboratorio prefiera UPS en línea (doble conversión).'}}});
+
+const EGC_CU=[[15,'14'],[20,'12'],[60,'10'],[100,'8'],[200,'6'],[300,'4'],[400,'3'],[500,'2'],[600,'1'],[800,'1/0'],[1000,'2/0'],[1200,'3/0'],[1600,'4/0'],[2000,'250'],[2500,'350'],[3000,'400'],[4000,'500'],[5000,'700'],[6000,'800']];
+const EGC_AL=[[15,'12'],[20,'10'],[60,'8'],[100,'6'],[200,'4'],[300,'2'],[400,'1'],[500,'1/0'],[600,'2/0'],[800,'3/0'],[1000,'4/0'],[1200,'250'],[1600,'350'],[2000,'400'],[2500,'600'],[3000,'600'],[4000,'750'],[5000,'1200'],[6000,'1200']];
+const lblSz=s=>/^\d{3,}$/.test(s)?s+' kcmil':s+' AWG';
+add({id:'conductor-tierra',cat:'proyectos',ab:'⏚',name:'Conductor de tierra (NEC 250.122 y 250.66)',desc:'Conductor de puesta a tierra de equipos según el breaker, y del electrodo según la acometida.',kw:'tierra conductor puesta tierra equipos electrodo acometida verde desnudo',
+ inputs:[{id:'brk',l:'Interruptor del circuito o alimentador',u:'A',d:'200'},{id:'sz',l:'Conductor de acometida (fase)',t:'sel',o:O_SIZE,d:'13'},{id:'par',l:'Conductores por fase en la acometida',d:'1'}],
+ calc(v){const e=EGC_CU.find(x=>x[0]>=v.brk),ea=EGC_AL.find(x=>x[0]>=v.brk);const area=MM2[+v.sz]*v.par;const mm=s=>MM2[SIZES.indexOf(s)];
+  const gec=area<=mm('2')?'8':area<=mm('1/0')?'6':area<=mm('3/0')?'4':area<=mm('350')?'2':area<=mm('600')?'1/0':area<=557?'2/0':'3/0';
+  return {rows:[['Tierra de equipos (Cu)',e?lblSz(e[1]):'—','main'],['Tierra de equipos (Al)',ea?lblSz(ea[1]):'—'],['Conductor del electrodo (Cu)',lblSz(gec),'main'],['Conductor a la varilla',lblSz(gec==='8'?'8':'6')+' Cu (no se exige mayor)']],
+   note:'NEC 250.122 (tierra de equipos según la protección) y 250.66 (electrodo según el área equivalente de la acometida). Si aumenta el calibre de fase por caída de tensión, aumente la tierra de equipos en la misma proporción (250.122(B)).'}}});
+
+add({id:'aire-acondicionado',cat:'proyectos',ab:'A/C',name:'Aire acondicionado: eléctrico y consumo',desc:'Toneladas, corriente, conductor, protección y costo mensual de un equipo de A/C.',kw:'aire acondicionado btu toneladas minisplit consumo mca mop',
+ inputs:[{id:'btu',l:'Capacidad',u:'BTU/h',d:'24000'},{id:'eer',l:'Eficiencia EER (o SEER × 0,875)',d:'11'},{id:'sis',l:'Sistema',t:'sel',o:[['1f','Monofásico'],['3f','Trifásico']],d:'1f'},{id:'V',l:'Tensión',u:'V',d:'220'},{id:'fp',l:'Factor de potencia',d:'0.9'},
+  {id:'h',l:'Horas de uso por día',u:'h',d:'10'},{id:'t',l:'Tarifa',u:'C$/kWh',d:'7.5'}],
+ calc(v){const kW=v.btu/v.eer/1000;const I=kW*1000/((v.sis==='3f'?SQ3:1)*v.V*v.fp);const mca=I*1.25;const mop=nextBrk(I*1.75);const ci=AMP_CU.findIndex((a,i)=>a[1]>=mca&&(!SMALLMAX.cu[i]||SMALLMAX.cu[i]>=Math.min(mop,SMALLMAX.cu[i])));
+  const kwh=kW*v.h*30*0.7;return {rows:[['Capacidad',fmt(v.btu/12000,2)+' TR','main'],['Potencia eléctrica',fmt(kW,2)+' kW'],['Corriente estimada',fmt(I)+' A'],['MCA (125 %)',fmt(mca)+' A'],['Conductor Cu 75 °C',ci>=0?SZL(ci):'—'],['Protección máxima (MOP ≈ 175 %)',mop+' A','main'],['Consumo mensual estimado',fmt(kwh,0)+' kWh'],['Costo mensual','C$ '+fmt(kwh*v.t,0)]],
+   note:'Siempre prevalecen los valores MCA y MOP de la placa del equipo (NEC 440). Consumo estimado con el compresor trabajando ~70 % del tiempo.'}}});
+
+add({id:'fv-red',cat:'proyectos',ab:'☀',name:'Sistema fotovoltaico conectado a red',desc:'kWp, paneles, inversor, área y ahorro a partir del consumo mensual del cliente.',kw:'solar fotovoltaico red generacion distribuida net metering ahorro inversor paneles',
+ inputs:[{id:'E',l:'Consumo mensual del cliente',u:'kWh',d:'3000'},{id:'pct',l:'Porcentaje a cubrir',u:'%',d:'80'},{id:'hsp',l:'Horas solares pico',u:'h',d:'5'},{id:'pr',l:'Rendimiento del sistema (PR)',d:'0.8'},{id:'Wp',l:'Potencia del panel',u:'Wp',d:'550'},{id:'t',l:'Tarifa del cliente',u:'C$/kWh',d:'7.5'},{id:'cost',l:'Costo instalado (opcional)',u:'US$/Wp',opt:1,d:'0.9'},{id:'tc',l:'Tipo de cambio',u:'C$/US$',d:'36.6',show:v=>isFinite(v.cost)}],
+ calc(v){const kWp=v.E*v.pct/100/(30*v.hsp*v.pr);const N=Math.ceil(kWp*1000/v.Wp-1e-9);const real=N*v.Wp/1000;const gen=real*v.hsp*v.pr*30;const ah=gen*v.t;
+  const r=[['Potencia FV requerida',fmt(kWp,2)+' kWp'],['Paneles',N+' × '+v.Wp+' Wp = '+fmt(real,2)+' kWp','main'],['Inversor sugerido',fmt(real/1.2,1)+' – '+fmt(real/1.1,1)+' kW AC'],['Área de techo aprox.',fmt(N*2.6,0)+' m²'],['Generación mensual',fmt(gen,0)+' kWh'],['Ahorro mensual','C$ '+fmt(ah,0),'main']];
+  if(isFinite(v.cost)){const inv=real*1000*v.cost*v.tc;r.push(['Inversión estimada','US$ '+fmt(real*1000*v.cost,0)]);r.push(['Retorno simple',fmt(inv/ah/12,1)+' años'])}
+  return {rows:r,note:'Relación DC/AC de 1,1 a 1,2. Área considerando paneles de ~2,6 m² con espacio de mantenimiento. Verifique la estructura del techo y los requisitos de la distribuidora para generación distribuida.'}}});
+
+const HP_STD=[0.5,0.75,1,1.5,2,3,5,7.5,10,15,20,25,30,40,50,60,75,100,125,150,200];
+add({id:'bombeo',cat:'proyectos',ab:'💧',name:'Potencia de bomba',desc:'Potencia hidráulica, del motor y eléctrica de una bomba según caudal y altura.',kw:'bomba bombeo caudal altura cdt potencia motor pozo',
+ inputs:[{id:'Q',l:'Caudal',d:'50'},{id:'qu',l:'Unidad de caudal',t:'sel',o:[['gpm','GPM'],['m3h','m³/h'],['ls','L/s']],d:'gpm'},{id:'H',l:'Altura dinámica total',u:'m',d:'40',h:'Altura estática + pérdidas por fricción + presión de descarga'},{id:'eb',l:'Eficiencia de la bomba',u:'%',d:'65'},{id:'em',l:'Eficiencia del motor',u:'%',d:'85'}],
+ calc(v){const Qs={gpm:0.0630902e-3,m3h:1/3600,ls:1e-3}[v.qu]*v.Q;const Ph=1000*9.81*Qs*v.H;const Pe=Ph/(v.eb/100);const Pel=Pe/(v.em/100);const hp=HP_STD.find(x=>x*745.7>=Pe);
+  return {rows:[['Potencia hidráulica',fmt(Ph/1000,2)+' kW'],['Potencia al eje',fmt(Pe/1000,2)+' kW = '+fmt(Pe/745.7,2)+' HP'],['Motor comercial',hp?HPL(hp)+' HP':'> 200 HP','main'],['Potencia eléctrica absorbida',fmt(Pel/1000,2)+' kW'],['Arreglo solar directo aprox.',fmt(Pel*1.3/1000,2)+' kWp']],
+   note:'Para bombeo solar directo el arreglo se sobredimensiona ~30 % para operar más horas al día. Verifique la curva de la bomba en el punto de operación.'}}});
+
+add({id:'armonicos',cat:'proyectos',ab:'THD',name:'Armónicos: THD y factor K',desc:'Distorsión armónica total, valor eficaz y factor K del transformador a partir del espectro del analizador.',kw:'armonicos thd distorsion factor k transformador ieee 519 calidad energia analizador',
+ inputs:[{id:'f',l:'Fundamental (A o V)',d:'100'},{id:'hs',l:'Armónicos: orden ; % de la fundamental (uno por línea)',t:'area',d:'3; 25\n5; 15\n7; 8\n9; 5\n11; 4\n13; 3'}],
+ calc(v){const H=parseLines(v.hs).map(r=>[num(r[0]),num(r[1])]).filter(r=>r[0]>1&&isFinite(r[1]));if(!H.length)return {error:'Ingrese los armónicos: orden; porcentaje.'};
+  const s2=H.reduce((s,r)=>s+Math.pow(r[1]/100,2),0);const thd=Math.sqrt(s2)*100;const rms=v.f*Math.sqrt(1+s2);const K=(1+H.reduce((s,r)=>s+Math.pow(r[1]/100,2)*r[0]*r[0],0))/(1+s2);
+  const kr=[4,9,13,20,30,40,50].find(x=>x>=K);const trip=H.filter(r=>r[0]%3===0).reduce((s,r)=>s+Math.pow(r[1]/100,2),0);
+  return {rows:[['THD',fmt(thd,1)+' %','main '+(thd<=5?'ok':thd<=8?'warn':'bad')],['Valor eficaz total',fmt(rms,2)+' (×'+fmt(rms/v.f,3)+')'],['Factor K',fmt(K,2),'main'],['Transformador recomendado',K<=1.5?'Estándar (K-1)':'K-'+(kr||'50')],['Neutro por triples (3.º, 9.º…)',fmt(3*v.f*Math.sqrt(trip),1)+' (si las 3 fases son iguales)']],
+   note:'IEEE 519-2022, tensión ≤ 1 kV: THDv ≤ 8 % y cada armónico ≤ 5 %. Para la corriente se evalúa el TDD según la relación Isc/IL en el punto de acoplamiento común (PCC). Con THDi alto, reduzca la cargabilidad del transformador o use uno con factor K.'}}});
+
+/* ============ MOTORES ============ */
+add({id:'motor-corriente',cat:'motores',ab:'In',name:'Corriente nominal del motor',desc:'Corriente a plena carga a partir de la potencia, eficiencia y factor de potencia.',kw:'motor corriente amperaje placa',
+ inputs:[{id:'sis',l:'Sistema',t:'sel',o:O_SIS_AC,d:'3f'},{id:'P',l:'Potencia de salida',d:'10'},{id:'pu',l:'Unidad',t:'sel',o:[['HP','HP'],['kW','kW'],['CV','CV']],d:'HP'},{id:'V',l:'Tensión',u:'V',d:'460'},{id:'ef',l:'Eficiencia',u:'%',d:'89'},{id:'fp',l:'Factor de potencia',d:'0.85'}],
+ calc(v){const Po=v.P*({HP:745.7,kW:1000,CV:735.5}[v.pu]);const Pin=Po/(v.ef/100);const I=Pin/((v.sis==='3f'?SQ3:1)*v.V*v.fp);
+  return {rows:[['Corriente nominal',fmt(I)+' A','main'],['Potencia absorbida',fmt(Pin/1000)+' kW'],['Potencia aparente',fmt(Pin/v.fp/1000)+' kVA'],['Potencia de salida',fmt(Po/1000)+' kW = '+fmt(Po/745.7)+' HP']]}}});
+
+const O_MV=[['3f-208','Trifásico 208 V'],['3f-230','Trifásico 220–240 V'],['3f-460','Trifásico 440–480 V'],['1f-115','Monofásico 115–120 V'],['1f-230','Monofásico 220–240 V']];
+const O_HP=[...new Set([...MOT1.map(r=>r[0]),...MOT3.map(r=>r[0])])].sort((a,b)=>a-b).map(h=>[String(h),HPL(h)+' HP']);
+add({id:'motor-nec',cat:'motores',ab:'NEC',name:'Circuito de motor (NEC 430)',desc:'Corriente de tabla, conductor, protección contra cortocircuito y relé de sobrecarga.',kw:'motor proteccion breaker guardamotor rele sobrecarga conductor nec 430',
+ inputs:[{id:'hp',l:'Potencia del motor',t:'sel',o:O_HP,d:'10'},{id:'vt',l:'Tensión',t:'sel',o:O_MV,d:'3f-460'},{id:'sf',l:'Factor de servicio',t:'sel',o:[['115','≥ 1,15'],['100','1,00']],d:'115'},{id:'In',l:'Corriente de placa (opcional)',u:'A',opt:1}],
+ calc(v){const hp=+v.hp;let flc;if(v.vt.startsWith('3f')){const r=MOT3.find(x=>Math.abs(x[0]-hp)<1e-6);if(r)flc=r[{'3f-208':1,'3f-230':2,'3f-460':3}[v.vt]]}
+  else{const r=MOT1.find(x=>Math.abs(x[0]-hp)<1e-6);if(r)flc=r[v.vt==='1f-115'?1:2]}if(!flc)return {error:'Esta potencia no está en la tabla NEC para esa tensión.'};
+  const Ic=flc*1.25;const ci=AMP_CU.findIndex(a=>a[1]>=Ic);const ol=(isFinite(v.In)?v.In:flc)*(v.sf==='115'?1.25:1.15);
+  return {rows:[['Corriente de tabla (FLC)',fmt(flc)+' A','main'],['Corriente para conductor (125 %)',fmt(Ic)+' A'],['Conductor mínimo Cu 75 °C',ci>=0?SZL(ci):'—','main'],
+   ['Interruptor de tiempo inverso (250 %)',nextBrk(flc*2.5)+' A'],['Fusible de elemento dual (175 %)',nextBrk(flc*1.75)+' A'],['Fusible sin retardo (300 %)',nextBrk(flc*3)+' A'],['Interruptor de disparo instantáneo (800 %)',fmt(flc*8,0)+' A máx.'],
+   ['Ajuste relé de sobrecarga',fmt(ol)+' A ('+(v.sf==='115'?'125':'115')+' % de '+(isFinite(v.In)?'placa':'FLC')+')']],
+   note:'NEC Tablas 430.248 / 430.250 y 430.52. Si el valor calculado no es normalizado se permite el tamaño inmediato superior. La sobrecarga se ajusta con la corriente de placa del motor.'}}});
+
+add({id:'motor-velocidad',cat:'motores',ab:'rpm',name:'Velocidad y deslizamiento',desc:'Velocidad síncrona y deslizamiento del motor de inducción.',kw:'rpm polos deslizamiento velocidad sincrona',
+ inputs:[{id:'f',l:'Frecuencia',u:'Hz',d:'60'},{id:'p',l:'Número de polos',t:'sel',o:[['2','2'],['4','4'],['6','6'],['8','8'],['10','10'],['12','12']],d:'4'},{id:'n',l:'Velocidad de placa',u:'rpm',d:'1750',opt:1}],
+ calc(v){const ns=120*v.f/v.p;const r=[['Velocidad síncrona',fmt(ns,0)+' rpm','main']];if(isFinite(v.n)){r.push(['Deslizamiento',fmt((ns-v.n)/ns*100,2)+' %']);r.push(['Frecuencia del rotor',fmt((ns-v.n)/ns*v.f,2)+' Hz'])}return {rows:r}}});
+
+add({id:'motor-par',cat:'motores',ab:'T',name:'Par (torque) del motor',desc:'Par nominal a partir de la potencia y la velocidad.',kw:'torque par newton',
+ inputs:[{id:'P',l:'Potencia',d:'10'},{id:'pu',l:'Unidad',t:'sel',o:[['HP','HP'],['kW','kW']],d:'HP'},{id:'n',l:'Velocidad',u:'rpm',d:'1750'}],
+ calc(v){const P=v.P*(v.pu==='HP'?745.7:1000);const T=P/(2*Math.PI*v.n/60);return {rows:[['Par nominal',fmt(T)+' N·m','main'],['En lb·pie',fmt(T/1.35582)+' lb·ft'],['En kgf·m',fmt(T/9.80665)+' kgf·m']]}}});
+
+add({id:'motor-eficiencia',cat:'motores',ab:'η',name:'Eficiencia del motor',desc:'Eficiencia a partir de la potencia de salida y la medición eléctrica.',kw:'rendimiento eficiencia',
+ inputs:[{id:'sis',l:'Sistema',t:'sel',o:O_SIS_AC,d:'3f'},{id:'P',l:'Potencia de salida',d:'10'},{id:'pu',l:'Unidad',t:'sel',o:[['HP','HP'],['kW','kW']],d:'HP'},{id:'V',l:'Tensión medida',u:'V',d:'460'},{id:'I',l:'Corriente medida',u:'A',d:'12'},{id:'fp',l:'Factor de potencia',d:'0.85'}],
+ calc(v){const Po=v.P*(v.pu==='HP'?745.7:1000);const Pin=(v.sis==='3f'?SQ3:1)*v.V*v.I*v.fp;return {rows:[['Eficiencia',fmt(Po/Pin*100,1)+' %','main'],['Potencia absorbida',fmt(Pin/1000)+' kW'],['Pérdidas',fmt((Pin-Po)/1000)+' kW']]}}});
+
+add({id:'motor-arranque',cat:'motores',ab:'Ia',name:'Corriente de arranque',desc:'Corriente de arranque estimada según el método.',kw:'arranque directo estrella triangulo arrancador suave variador',
+ inputs:[{id:'In',l:'Corriente nominal',u:'A',d:'28'},{id:'m',l:'Método de arranque',t:'sel',o:[['dol','Directo (DOL)'],['yd','Estrella-triángulo'],['soft','Arrancador suave'],['vfd','Variador de frecuencia'],['auto','Autotransformador (65 %)']],d:'dol'}],
+ calc(v){const r={dol:[6,8],yd:[2,2.7],soft:[2.5,4],vfd:[1,1.5],auto:[2.5,3.4]}[v.m];return {rows:[['Corriente de arranque',fmt(v.In*r[0],0)+' – '+fmt(v.In*r[1],0)+' A','main'],['Múltiplo de In',fmt(r[0],1)+' – '+fmt(r[1],1)+' ×']],note:'Valores típicos. En estrella-triángulo la corriente y el par de arranque se reducen a 1/3 del arranque directo.'}}});
+
+add({id:'motor-capacitor',cat:'motores',ab:'µF',name:'Capacitor para motor trifásico en red monofásica',desc:'Capacitor de marcha para conexión Steinmetz (aproximación).',kw:'steinmetz capacitor monofasico trifasico',
+ inputs:[{id:'P',l:'Potencia del motor',u:'kW',d:'1.5'},{id:'V',l:'Tensión de la red',u:'V',d:'230'},{id:'f',l:'Frecuencia',u:'Hz',d:'60'}],
+ calc(v){const C=70*v.P*Math.pow(230/v.V,2)*(50/v.f);return {rows:[['Capacitor de marcha',fmt(C,0)+' µF','main'],['Capacitor de arranque (opcional)',fmt(C*2,0)+' – '+fmt(C*3,0)+' µF'],['Tensión del capacitor','≥ '+fmt(v.V*1.3,0)+' V AC']],note:'Regla práctica: ~70 µF por kW a 230 V/50 Hz. El motor entrega aprox. 60–70 % de su potencia nominal. Solo para motores pequeños (≤ 2 kW).'}}});
+
+/* ============ ELECTRÓNICA ============ */
+const bandOpts=(f)=>COLORS.map((c,i)=>[String(i),c.n]).filter(([i])=>f(COLORS[+i]));
+add({id:'colores-resistencia',cat:'electronica',ab:'▥',name:'Código de colores de resistencias',desc:'Valor de una resistencia de 4 o 5 bandas.',kw:'resistor bandas colores',
+ inputs:[{id:'nb',l:'Número de bandas',t:'sel',o:[['4','4 bandas'],['5','5 bandas']],d:'4'},{id:'b1',l:'1.ª banda',t:'sel',o:bandOpts(c=>c.d!==null&&c.d>0),d:'4'},{id:'b2',l:'2.ª banda',t:'sel',o:bandOpts(c=>c.d!==null),d:'7'},
+  {id:'b3',l:'3.ª banda',t:'sel',o:bandOpts(c=>c.d!==null),d:'0',show:v=>v.nb==='5'},{id:'bm',l:'Multiplicador',t:'sel',o:bandOpts(c=>c.m<=1e9),d:'2'},{id:'bt',l:'Tolerancia',t:'sel',o:bandOpts(c=>c.t!==null),d:'10'}],
+ calc(v){const d=[COLORS[+v.b1].d,COLORS[+v.b2].d];if(v.nb==='5')d.push(COLORS[+v.b3].d);const R=Number(d.join(''))*COLORS[+v.bm].m;const t=COLORS[+v.bt].t;
+  const bands=[v.b1,v.b2,...(v.nb==='5'?[v.b3]:[]),v.bm,v.bt].map(i=>COLORS[+i].c);
+  return {html:resistorSVG(bands),rows:[['Resistencia',si(R,'Ω'),'main'],['Tolerancia','± '+fmt(t)+' %'],['Rango',si(R*(1-t/100),'Ω')+' – '+si(R*(1+t/100),'Ω')]]}}});
+function resistorSVG(b){const n=b.length;let x=78;const step=n===5?24:28;let s='';b.forEach((c,i)=>{if(i===n-1)x=208;s+=`<rect x="${x}" y="18" width="12" height="44" fill="${c}" stroke="rgba(0,0,0,.25)"/>`;x+=step});
+ return `<svg class="resistor" viewBox="0 0 300 80"><line x1="0" y1="40" x2="300" y2="40" stroke="#999" stroke-width="5"/><rect x="58" y="14" width="184" height="52" rx="22" fill="#d9c08f" stroke="#a48b5a"/>${s}</svg>`}
+
+add({id:'resistencia-colores',cat:'electronica',ab:'Ω→',name:'Valor → colores de resistencia',desc:'Obtiene los colores para un valor de resistencia.',kw:'resistor bandas colores inverso',
+ inputs:[{id:'R',l:'Valor (ej. 4.7k, 220, 1M)',t:'text',d:'4.7k'}],
+ calc(v){const R=parseSI(v.R);if(!(R>0))return {error:'Valor no válido.'};const out=[];let html='';
+  for(const nd of [2,3]){let e=Math.floor(Math.log10(R))-(nd-1);let m=Math.round(R/Math.pow(10,e));if(m>=Math.pow(10,nd)){m/=10;e++}
+   if(e<-2||e>9){out.push([nd+2+' bandas','fuera de rango']);continue}const ds=String(m).padStart(nd,'0').split('').map(Number);
+   const mi=e===-1?10:e===-2?11:e;const cols=[...ds.map(x=>x),mi].map(i=>COLORS[i]);const tol=COLORS[nd===2?10:1];
+   out.push([(nd+2)+' bandas',[...cols,tol].map(c=>c.n).join(' · ')]);if(nd===2)html=resistorSVG([...cols,tol].map(c=>c.c));
+   if(Math.abs(m*Math.pow(10,e)-R)/R>1e-6)out.push(['Valor redondeado',si(m*Math.pow(10,e),'Ω')])}
+  return {html,rows:out,note:'Tolerancia mostrada: dorado (±5 %) para 4 bandas, café (±1 %) para 5 bandas.'}}});
+
+add({id:'codigo-capacitor',cat:'electronica',ab:'104',name:'Código de capacitores',desc:'Decodifica códigos como 104, 473J, 4n7 o 2A104K.',kw:'condensador ceramico codigo',
+ inputs:[{id:'c',l:'Código impreso',t:'text',d:'104J'}],
+ calc(v){let s=String(v.c||'').trim().toUpperCase().replace(/\s/g,'');const VC={'0J':6.3,'1A':10,'1C':16,'1E':25,'1H':50,'1J':63,'2A':100,'2D':200,'2E':250,'2G':400,'2J':630,'3A':1000};
+  let volt=null;const vm=s.match(/^(\d[A-Z])(?=\d)/);if(vm&&VC[vm[1]]){volt=VC[vm[1]];s=s.slice(2)}
+  const TOL={B:'±0,1 pF',C:'±0,25 pF',D:'±0,5 pF',F:'±1 %',G:'±2 %',J:'±5 %',K:'±10 %',M:'±20 %',Z:'+80 / −20 %'};let tol=null;
+  const tm=s.match(/([BCDFGJKMZ])$/);if(tm&&!/[PNU]/.test(s.slice(-2,-1))){tol=TOL[tm[1]];s=s.slice(0,-1)}let pF;
+  if(/^\d{3}$/.test(s)){const m=+s[2];pF=+s.slice(0,2)*(m===8?0.01:m===9?0.1:Math.pow(10,m))}else if(/^\d{1,2}$/.test(s))pF=+s;
+  else{const r=s.match(/^(\d*)([PNUµ])(\d*)$/);if(r){const mult={P:1,N:1e3,U:1e6,'µ':1e6}[r[2]];pF=Number((r[1]||'0')+'.'+(r[3]||'0'))*mult}}
+  if(!isFinite(pF))return {error:'Código no reconocido.'};
+  return {rows:[['Capacitancia',si(pF*1e-12,'F'),'main'],['En pF',fmt(pF)+' pF'],['En nF',fmt(pF/1000,4)+' nF'],['En µF',fmt(pF/1e6,6)+' µF'],...(tol?[['Tolerancia',tol]]:[]),...(volt?[['Tensión',volt+' V']]:[])]}}});
+
+add({id:'serie-paralelo',cat:'electronica',ab:'∥',name:'Resistencias, capacitores e inductores en serie/paralelo',desc:'Valor equivalente de varios componentes.',kw:'equivalente serie paralelo resistencias condensadores bobinas',
+ inputs:[{id:'tp',l:'Componente',t:'sel',o:[['R','Resistencias (Ω)'],['C','Capacitores (F)'],['L','Inductores (H)']],d:'R'},{id:'vals',l:'Valores separados por espacio o punto y coma',t:'text',d:'100 220 1k',h:'Admite sufijos: p, n, u, m, k, M (ej. 4.7k, 100n, 10u)'}],
+ calc(v){const a=String(v.vals||'').split(/[;\s]+/).filter(Boolean).map(parseSI);if(!a.length||a.some(x=>!(x>0)))return {error:'Revise los valores.'};
+  const sum=a.reduce((s,x)=>s+x,0),inv=1/a.reduce((s,x)=>s+1/x,0);const u={R:'Ω',C:'F',L:'H'}[v.tp];const ser=v.tp==='C'?inv:sum,par=v.tp==='C'?sum:inv;
+  return {rows:[['Serie',si(ser,u),'main'],['Paralelo',si(par,u),'main'],['Cantidad',a.length]]}}});
+
+add({id:'divisor',cat:'electronica',ab:'÷',name:'Divisor de tensión',desc:'Tensión de salida de un divisor resistivo.',kw:'divisor voltaje resistivo',
+ inputs:[{id:'Vin',l:'Tensión de entrada',u:'V',d:'12'},{id:'R1',l:'R1 (superior)',t:'text',d:'10k'},{id:'R2',l:'R2 (inferior)',t:'text',d:'4.7k'},{id:'RL',l:'Carga en la salida (opcional)',t:'text',d:''}],
+ calc(v){const R1=parseSI(v.R1),R2=parseSI(v.R2),RL=parseSI(v.RL);if(!(R1>0&&R2>0))return {error:'Revise R1 y R2.'};const R2e=RL>0?R2*RL/(R2+RL):R2;const Vo=v.Vin*R2e/(R1+R2e);
+  return {rows:[['Tensión de salida',fmt(Vo,3)+' V','main'],['Corriente del divisor',si(v.Vin/(R1+R2e),'A')],['Potencia en R1',si(Math.pow(v.Vin-Vo,2)/R1,'W')]]}}});
+
+add({id:'led',cat:'electronica',ab:'LED',name:'Resistencia para LED',desc:'Resistencia limitadora para uno o varios LED en serie.',kw:'led diodo resistencia limitadora',
+ inputs:[{id:'Vs',l:'Tensión de alimentación',u:'V',d:'12'},{id:'Vf',l:'Tensión directa del LED',u:'V',d:'2',h:'Rojo ≈ 2 V · Verde/Azul/Blanco ≈ 3–3,3 V'},{id:'I',l:'Corriente del LED',u:'mA',d:'20'},{id:'n',l:'LED en serie',d:'1'}],
+ calc(v){const Vr=v.Vs-v.Vf*v.n;if(Vr<=0)return {error:'La tensión de alimentación no alcanza para esos LED.'};const R=Vr/(v.I/1000);
+  const dec=Math.pow(10,Math.floor(Math.log10(R)));let std=E12.map(x=>x*dec/10).concat(E12.map(x=>x*dec)).find(x=>x>=R-1e-9)||10*dec;
+  return {rows:[['Resistencia calculada',si(R,'Ω'),'main'],['Valor comercial (E12)',si(std,'Ω'),'main'],['Corriente real',fmt(Vr/std*1000,1)+' mA'],['Potencia en la resistencia',si(Vr*Vr/std,'W')+' → use '+(Vr*Vr/std<0.125?'1/8':Vr*Vr/std<0.25?'1/4':Vr*Vr/std<0.5?'1/2':'1')+' W o más']]}}});
+
+add({id:'rc',cat:'electronica',ab:'τ',name:'Constante de tiempo RC',desc:'Constante de tiempo y carga de un capacitor.',kw:'rc carga descarga capacitor tiempo',
+ inputs:[{id:'R',l:'Resistencia',t:'text',d:'10k'},{id:'C',l:'Capacitancia',t:'text',d:'100u'},{id:'V',l:'Tensión de carga',u:'V',d:'12'},{id:'t',l:'Tiempo a evaluar (opcional)',u:'s',opt:1}],
+ calc(v){const R=parseSI(v.R),C=parseSI(v.C);if(!(R>0&&C>0))return {error:'Revise R y C.'};const tau=R*C;const r=[['Constante τ',si(tau,'s'),'main'],['Carga al 99 % (5τ)',si(5*tau,'s')],['Frecuencia de corte',si(1/(2*Math.PI*tau),'Hz')]];
+  if(isFinite(v.t))r.push(['Tensión en t = '+v.t+' s',fmt(v.V*(1-Math.exp(-v.t/tau)),3)+' V']);return {rows:r}}});
+
+add({id:'555',cat:'electronica',ab:'555',name:'Temporizador 555 astable',desc:'Frecuencia y ciclo de trabajo del 555.',kw:'ne555 oscilador astable',
+ inputs:[{id:'R1',l:'R1',t:'text',d:'1k'},{id:'R2',l:'R2',t:'text',d:'10k'},{id:'C',l:'C',t:'text',d:'10u'}],
+ calc(v){const R1=parseSI(v.R1),R2=parseSI(v.R2),C=parseSI(v.C);if(!(R1>0&&R2>0&&C>0))return {error:'Revise los valores.'};const th=0.693*(R1+R2)*C,tl=0.693*R2*C;
+  return {rows:[['Frecuencia',si(1/(th+tl),'Hz'),'main'],['Ciclo de trabajo',fmt(th/(th+tl)*100,1)+' %'],['Tiempo en alto',si(th,'s')],['Tiempo en bajo',si(tl,'s')]]}}});
+
+/* ============ CONVERSIONES ============ */
+const CONV={
+ potencia:{name:'Potencia',u:[['W',1],['kW',1e3],['MW',1e6],['HP',745.7],['CV',735.5],['BTU/h',0.29307107],['TR (ton. refrig.)',3516.8525],['kcal/h',1.163]],d:'kW'},
+ energia:{name:'Energía',u:[['J',1],['kJ',1e3],['Wh',3600],['kWh',3.6e6],['MWh',3.6e9],['BTU',1055.056],['cal',4.184],['kcal',4184]],d:'kWh'},
+ presion:{name:'Presión',u:[['Pa',1],['kPa',1e3],['MPa',1e6],['bar',1e5],['psi',6894.757],['atm',101325],['mmHg',133.3224],['m.c.a.',9806.65],['kgf/cm²',98066.5]],d:'psi'},
+ longitud:{name:'Longitud',u:[['mm',1e-3],['cm',1e-2],['m',1],['km',1e3],['pulgada',0.0254],['pie',0.3048],['yarda',0.9144],['vara (Nic.)',0.8359],['milla',1609.344]],d:'m'},
+ area:{name:'Área',u:[['mm²',1e-6],['cm²',1e-4],['m²',1],['km²',1e6],['pulg²',0.00064516],['pie²',0.09290304],['vara² (Nic.)',0.69873],['manzana (Nic.)',6987.3],['hectárea',1e4],['kcmil',5.067075e-7]],d:'m²'},
+ torque:{name:'Par (torque)',u:[['N·m',1],['kgf·m',9.80665],['lbf·pie',1.355818],['lbf·pulg',0.1129848]],d:'N·m'},
+ caudal:{name:'Caudal',u:[['L/s',1],['L/min',1/60],['m³/h',1/3.6],['m³/s',1000],['GPM (EE. UU.)',0.0630902]],d:'GPM (EE. UU.)'},
+ velang:{name:'Velocidad angular',u:[['rad/s',1],['rpm',2*Math.PI/60],['Hz (rev/s)',2*Math.PI]],d:'rpm'},
+ temperatura:{name:'Temperatura',temp:1,u:[['°C'],['°F'],['K']],d:'°C'}};
+function tempConv(x,from){const c=from==='°C'?x:from==='°F'?(x-32)*5/9:x-273.15;return [['°C',c],['°F',c*9/5+32],['K',c+273.15]]}
+Object.entries(CONV).forEach(([k,c])=>add({id:'conv-'+k,cat:'conversiones',ab:c.name.slice(0,2),name:'Conversión de '+c.name.toLowerCase(),desc:'Convierte entre '+c.u.map(x=>x[0]).join(', ')+'.',kw:'convertir unidades '+c.u.map(x=>x[0]).join(' '),
+ inputs:[{id:'x',l:'Valor',d:'1'},{id:'u',l:'Unidad de origen',t:'sel',o:c.u.map(x=>[x[0],x[0]]),d:c.d}],
+ calc(v){if(c.temp)return {rows:tempConv(v.x,v.u).map(([u,y])=>[u,fmt(y,2),u===v.u?'main':''])};const base=v.x*c.u.find(x=>x[0]===v.u)[1];
+  return {rows:c.u.map(([u,f])=>[u,fmtConv(base/f),u===v.u?'main':''])}}}));
+function fmtConv(y){const a=Math.abs(y);if(a!==0&&(a<1e-4||a>=1e10))return y.toExponential(4).replace('.',',');return y.toLocaleString('es-NI',{maximumSignificantDigits:7})}
+
+add({id:'conv-awg',cat:'conversiones',ab:'AWG',name:'AWG ↔ mm²',desc:'Sección y diámetro de cualquier calibre AWG, o el AWG más cercano a una sección en mm².',kw:'awg mm2 calibre seccion diametro',
+ inputs:[{id:'m',l:'Convertir',t:'sel',o:[['a','AWG → mm²'],['m','mm² → AWG']],d:'a'},{id:'x',l:'Valor (AWG: 0000 = 4/0, use 1/0, 2/0…)',t:'text',d:'12'}],
+ calc(v){const awgN=s=>{s=String(s).trim();const m=s.match(/^([1-4])\/0$/);if(m)return 1-(+m[1]);if(/^0+$/.test(s))return 1-s.length;return Number(s)};
+  const d=n=>0.127*Math.pow(92,(36-n)/39);const lab=n=>n<=0?((1-n)+'/0'):String(n);
+  if(v.m==='a'){const n=awgN(v.x);if(!isFinite(n)||n>40||n<-3)return {error:'Calibre no válido.'};const D=d(n);return {rows:[['Sección',fmt(Math.PI/4*D*D,3)+' mm²','main'],['Diámetro',fmt(D,3)+' mm'],['En kcmil',fmt(Math.PI/4*D*D/0.5067,2)+' kcmil']]}}
+  const A=num(v.x);if(!(A>0))return {error:'Sección no válida.'};const n=36-39*Math.log(Math.sqrt(4*A/Math.PI)/0.127)/Math.log(92);const up=Math.floor(n);
+  return {rows:[['AWG equivalente',fmt(n,2)],['AWG comercial con igual o mayor sección',up<-3?(fmt(A/0.5067,0)+' kcmil'):lab(up)+' AWG','main'],['En kcmil',fmt(A/0.5067,1)+' kcmil']]}}});
+
+add({id:'conv-dbm',cat:'conversiones',ab:'dB',name:'dBm ↔ vatios',desc:'Convierte potencia entre dBm, dBW y vatios.',kw:'decibel dbm dbw',
+ inputs:[{id:'m',l:'Convertir',t:'sel',o:[['d','dBm → W'],['w','W → dBm']],d:'d'},{id:'x',l:'Valor',d:'30'}],
+ calc(v){const W=v.m==='d'?Math.pow(10,(v.x-30)/10):v.x;if(!(W>0))return {error:'Valor no válido.'};const dbm=10*Math.log10(W*1000);return {rows:[['Potencia',si(W,'W'),'main'],['dBm',fmt(dbm,2)+' dBm'],['dBW',fmt(dbm-30,2)+' dBW']]}}});
+
+add({id:'conv-kva',cat:'conversiones',ab:'kVA',name:'kVA ↔ kW',desc:'Convierte potencia aparente y activa con el factor de potencia.',kw:'kva kw factor potencia generador',
+ inputs:[{id:'m',l:'Convertir',t:'sel',o:[['a','kVA → kW'],['b','kW → kVA']],d:'a'},{id:'x',l:'Valor',d:'100'},{id:'fp',l:'Factor de potencia',d:'0.8'}],
+ calc(v){const kva=v.m==='a'?v.x:v.x/v.fp,kw=kva*v.fp;return {rows:[['kVA',fmt(kva),v.m==='b'?'main':''],['kW',fmt(kw),v.m==='a'?'main':''],['kVAR',fmt(Math.sqrt(kva*kva-kw*kw))]]}}});
+
+/* ============ TABLAS (recursos) ============ */
+const TABLES=[];
+const tbl=(o)=>{o.cat=o.cat||'tablas';o.table=1;TABLES.push(o);CALCS.push(o)};
+function T(head,rows,cls){return `<div class="tbl-wrap"><table class="${cls||''}"><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>typeof c==='number'?`<td class="n">${fmt(c,4)}</td>`:`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`}
+tbl({id:'tabla-awg',ab:'AWG',name:'Tabla de conductores AWG / kcmil',desc:'Sección, resistencia y ampacidad de conductores de cobre y aluminio.',kw:'tabla calibres ampacidad 310.16',
+ html:()=>`<div class="h3">Cobre — NEC 310.16 (30 °C, ≤ 3 portadores)</div>`+T(['Calibre','mm²','Ω/km 75 °C','60 °C','75 °C','90 °C'],SIZES.map((s,i)=>[SZL(i),MM2[i],+(rho('cu',75)/MM2[i]*1000).toFixed(4),AMP_CU[i][0],AMP_CU[i][1],AMP_CU[i][2]]))
+  +`<div class="h3">Aluminio</div>`+T(['Calibre','mm²','Ω/km 75 °C','60 °C','75 °C','90 °C'],SIZES.map((s,i)=>i?[SZL(i),MM2[i],+(rho('al',75)/MM2[i]*1000).toFixed(4),AMP_AL[i][0],AMP_AL[i][1],AMP_AL[i][2]]:null).filter(Boolean))
+  +`<div class="note">Protección máxima de conductores pequeños (NEC 240.4(D)): Cu 14 AWG = 15 A, 12 AWG = 20 A, 10 AWG = 30 A; Al 12 AWG = 15 A, 10 AWG = 25 A.</div>`});
+tbl({id:'tabla-factores',ab:'F',name:'Factores de corrección',desc:'Factores por temperatura ambiente y por número de conductores.',kw:'correccion temperatura agrupamiento',
+ html:()=>`<div class="h3">Temperatura ambiente (base 30 °C)</div>`+T(['Ambiente °C','60 °C','75 °C','90 °C'],TF.map((r,i)=>[(i?TF[i-1][0]+1:'≤ ')+(i?'–':'')+r[0],r[1]||'—',r[2]||'—',r[3]||'—']))
+  +`<div class="h3">Conductores portadores en una canalización</div>`+T(['Cantidad','Factor'],[['4 – 6','80 %'],['7 – 9','70 %'],['10 – 20','50 %'],['21 – 30','45 %'],['31 – 40','40 %'],['41 o más','35 %']])});
+tbl({id:'tabla-motores',ab:'FLC',name:'Corrientes de motores (NEC)',desc:'Corriente a plena carga de motores trifásicos y monofásicos.',kw:'motores corriente tabla 430.250 430.248',
+ html:()=>`<div class="h3">Trifásicos — NEC 430.250</div>`+T(['HP','kW','208 V','230 V','460 V'],MOT3.map(r=>[HPL(r[0]),+(r[0]*0.7457).toFixed(2),r[1],r[2],r[3]]))+`<div class="h3">Monofásicos — NEC 430.248</div>`+T(['HP','115 V','230 V'],MOT1.map(r=>[HPL(r[0]),r[1],r[2]]))});
+tbl({id:'tabla-breakers',ab:'BR',name:'Interruptores y curvas de disparo',desc:'Tamaños normalizados y curvas B, C, D, K, Z.',kw:'breaker curvas disparo tamaños normalizados',
+ html:()=>`<div class="h3">Tamaños normalizados (NEC 240.6) — A</div><div class="card mono" style="line-height:1.9">${BRK.join(' · ')}</div>`
+  +`<div class="h3">Curvas de disparo magnético (IEC 60898 / 60947)</div>`+T(['Curva','Disparo magnético','Aplicación'],[['B','3 – 5 × In','Cargas resistivas, circuitos largos'],['C','5 – 10 × In','Uso general, iluminación, tomacorrientes'],['D','10 – 20 × In','Motores, transformadores, alta corriente de arranque'],['K','8 – 14 × In','Motores y transformadores'],['Z','2 – 3 × In','Electrónica, semiconductores'],['MA','≈ 12 × In','Solo magnético, protección de motores']],'wrap')});
+tbl({id:'tabla-ip',ab:'IP',name:'Grados de protección IP y NEMA',desc:'Significado de los dígitos IP (IEC 60529) y equivalencias NEMA.',kw:'ip65 ip67 nema hermeticidad gabinete',
+ html:()=>`<div class="h3">Primer dígito — sólidos</div>`+T(['Dígito','Protección'],[['0','Sin protección'],['1','Objetos > 50 mm (mano)'],['2','Objetos > 12,5 mm (dedos)'],['3','Objetos > 2,5 mm (herramientas)'],['4','Objetos > 1 mm (alambres)'],['5','Protegido contra el polvo'],['6','Totalmente hermético al polvo']],'wrap')
+  +`<div class="h3">Segundo dígito — líquidos</div>`+T(['Dígito','Protección'],[['0','Sin protección'],['1','Goteo vertical'],['2','Goteo con inclinación de 15°'],['3','Lluvia (rociado hasta 60°)'],['4','Salpicaduras en todas direcciones'],['5','Chorros de agua'],['6','Chorros potentes de agua'],['7','Inmersión temporal (1 m, 30 min)'],['8','Inmersión continua (según fabricante)'],['9K','Chorros a alta presión y temperatura']],'wrap')
+  +`<div class="h3">Equivalencias aproximadas NEMA</div>`+T(['NEMA','IP aprox.','Uso'],[['1','IP10','Interior, uso general'],['3R','IP24','Exterior, lluvia'],['4','IP66','Exterior, chorros de agua'],['4X','IP66','Igual que 4 + resistente a la corrosión'],['12','IP52','Interior, polvo y goteo'],['6P','IP68','Inmersión prolongada']],'wrap')});
+tbl({id:'tabla-colores-cables',ab:'🎨',name:'Código de colores de cables',desc:'Colores de fases, neutro y tierra según NEC e IEC.',kw:'colores cables fases neutro tierra',
+ html:()=>{const sw=c=>`<span class="sw" style="background:${c}"></span>`;return `<div class="h3">Práctica NEC (EE. UU. / Nicaragua)</div>`+T(['Conductor','208/120 V · 240/120 V','480/277 V'],[['Fase A / L1',sw('#111')+'Negro',sw('#7b3f12')+'Café'],['Fase B / L2',sw('#d32222')+'Rojo',sw('#f07d00')+'Naranja'],['Fase C / L3',sw('#1f5fd1')+'Azul',sw('#f4d000')+'Amarillo'],['Neutro',sw('#fff')+'Blanco',sw('#8a8a8a')+'Gris'],['Tierra',sw('#1e9b3a')+'Verde / desnudo',sw('#1e9b3a')+'Verde / desnudo'],['Fase alta (delta 4 hilos)',sw('#f07d00')+'Naranja','—']])
+  +`<div class="h3">IEC 60445 (Europa y otros)</div>`+T(['Conductor','Color'],[['L1',sw('#7b3f12')+'Café'],['L2',sw('#111')+'Negro'],['L3',sw('#8a8a8a')+'Gris'],['Neutro',sw('#1f5fd1')+'Azul'],['Tierra (PE)',sw('linear-gradient(90deg,#1e9b3a 50%,#f4d000 50%)')+'Verde-amarillo'],['CC +',sw('#d32222')+'Rojo'],['CC −',sw('#111')+'Negro']])+`<div class="note">El NEC solo obliga los colores de neutro (blanco/gris) y tierra (verde); los de fase son práctica común. Confirme el estándar del proyecto o de la distribuidora.</div>`}});
+tbl({id:'tabla-tuberia',ab:'⌀',name:'Tuberías y áreas de conductores',desc:'Área interior de EMT y PVC, y área de conductores THHN.',kw:'tuberia conduit emt pvc area',
+ html:()=>T(['Diámetro','EMT mm²','EMT 40 %','PVC 40 mm²','PVC 40 %'],EMT.map((r,i)=>[r[0],Math.round(r[1]*IN2),Math.round(r[1]*IN2*0.4),Math.round(PVC[i][1]*IN2),Math.round(PVC[i][1]*IN2*0.4)]))
+  +`<div class="h3">Conductores THHN / THWN-2</div>`+T(['Calibre','Área mm²'],SIZES.map((s,i)=>[SZL(i),+(THHN[i]*IN2).toFixed(1)]))+`<div class="note">Llenado máximo: 1 conductor 53 %, 2 conductores 31 %, 3 o más 40 %.</div>`});
+tbl({id:'tabla-transformadores',ab:'TR',name:'Transformadores normalizados',desc:'Capacidades comerciales y corrientes a tensiones comunes.',kw:'transformadores kva corriente tabla',
+ html:()=>`<div class="h3">Trifásicos</div>`+T(['kVA','I a 208 V','I a 240 V','I a 480 V','I a 13,2 kV','I a 24,9 kV'],TR3.map(s=>[s,...[208,240,480,13200,24900].map(V=>+(s*1000/(SQ3*V)).toFixed(1))]))
+  +`<div class="h3">Monofásicos</div>`+T(['kVA','I a 120 V','I a 240 V','I a 7,62 kV','I a 14,4 kV'],TR1.map(s=>[s,...[120,240,7620,14400].map(V=>+(s*1000/V).toFixed(1))]))});
+tbl({id:'tabla-conexiones-motor',ab:'⚙',name:'Conexiones de motores trifásicos',desc:'Bornera de 6, 9 y 12 terminales en estrella y triángulo, tensión baja y alta.',kw:'conexion bornera estrella triangulo 9 puntas 12 puntas motor trifasico',
+ html:()=>`<div class="h3">Motor IEC de 6 terminales (220/380 V o 380/660 V)</div>`+T(['Conexión','Puentes','Alimentación'],[['Estrella (Y) — tensión alta','U2-V2-W2 unidos','L1→U1, L2→V1, L3→W1'],['Triángulo (Δ) — tensión baja','U1-W2, V1-U2, W1-V2','L1→U1, L2→V1, L3→W1']],'wrap')
+  +`<div class="note">Arranque estrella-triángulo: el motor debe estar diseñado para trabajar en Δ a la tensión de la red (ej. motor 380/660 V en red de 380 V, o 220/380 V en red de 220 V).</div>`
+  +`<div class="h3">Motor NEMA de 9 terminales — estrella (Y)</div>`+T(['Tensión','Puentes','Alimentación'],[['Baja (230 V) — Y paralelo','T4-T5-T6 unidos','L1→T1-T7, L2→T2-T8, L3→T3-T9'],['Alta (460 V) — Y serie','T4-T7, T5-T8, T6-T9','L1→T1, L2→T2, L3→T3']],'wrap')
+  +`<div class="h3">Motor NEMA de 9 terminales — triángulo (Δ)</div>`+T(['Tensión','Puentes','Alimentación'],[['Baja (230 V) — Δ paralelo','—','L1→T1-T6-T7, L2→T2-T4-T8, L3→T3-T5-T9'],['Alta (460 V) — Δ serie','T4-T7, T5-T8, T6-T9','L1→T1, L2→T2, L3→T3']],'wrap')
+  +`<div class="note">Para distinguir un motor de 9 puntas en Y de uno en Δ: en Y hay continuidad entre T7, T8 y T9 (3 grupos de 2 bobinas + estrella interna); en Δ hay continuidad T1-T4-T9, T2-T5-T7, T3-T6-T8.</div>`
+  +`<div class="h3">Motor NEMA de 12 terminales</div>`+T(['Conexión','Puentes','Alimentación'],[['Y paralelo (baja)','T4-T5-T6 y T10-T11-T12','L1→T1-T7, L2→T2-T8, L3→T3-T9'],['Y serie (alta)','T4-T7, T5-T8, T6-T9, T10-T11-T12','L1→T1, L2→T2, L3→T3'],['Δ paralelo (baja)','—','L1→T1-T6-T7-T12, L2→T2-T4-T8-T10, L3→T3-T5-T9-T11'],['Δ serie (alta)','T4-T7, T5-T8, T6-T9','L1→T1-T12, L2→T2-T10, L3→T3-T11']],'wrap')
+  +`<div class="note">Para invertir el giro intercambie dos fases de alimentación cualesquiera. Confirme siempre con el diagrama de la placa del motor.</div><div class="h3">Clases de aislamiento</div>`+T(['Clase','Temperatura máx.'],[['A','105 °C'],['E','120 °C'],['B','130 °C'],['F','155 °C'],['H','180 °C']])});
+tbl({id:'tabla-motor-monofasico',ab:'1φ',name:'Motores monofásicos: tipos y conexiones',desc:'Tipos de motor monofásico, bornera de doble tensión 115/230 V e inversión de giro.',kw:'motor monofasico capacitor arranque marcha psc fase partida conexion 115 230 inversion giro',
+ html:()=>`<div class="h3">Tipos de motor monofásico</div>`+T(['Tipo','Característica','Uso típico'],[['Fase partida','Devanado auxiliar + interruptor centrífugo; par de arranque bajo','Ventiladores, esmeriles, cargas livianas'],['Arranque por capacitor (CS)','Capacitor electrolítico solo en el arranque; par alto','Bombas, compresores, bandas'],['Capacitor permanente (PSC)','Capacitor de marcha siempre conectado; sin centrífugo','Ventiladores, sopladores, A/C (condensador)'],['Capacitor de arranque y marcha (CSCR)','Dos capacitores; par alto y buena eficiencia','Compresores, bombas de pozo'],['Polo sombreado','Sin capacitor; muy baja potencia y eficiencia','Extractores pequeños, motores de < 1/4 HP'],['Universal','Escobillas, funciona en CA o CC; alta velocidad','Herramientas eléctricas, licuadoras']],'wrap')
+  +`<div class="h3">Bornera NEMA doble tensión (T1–T4 principal, T5–T8 arranque)</div>`+T(['Tensión','L1','L2','Unir'],[['Baja (115 V)','T1, T3, T8','T2, T4, T5','—'],['Alta (230 V)','T1','T4, T5','T2, T3, T8']],'wrap')
+  +`<div class="note">Inversión de giro: intercambie T5 y T8 (extremos del devanado de arranque). Los devanados principales (T1-T2 y T3-T4) quedan en paralelo a 115 V y en serie a 230 V.</div>`
+  +`<div class="h3">Bornera IEC monofásica</div>`+T(['Terminal','Función'],[['U1 – U2','Devanado principal (marcha)'],['Z1 – Z2','Devanado auxiliar (arranque) con capacitor'],['Inversión','Intercambiar Z1 y Z2']],'wrap')
+  +`<div class="h3">Diagnóstico rápido con óhmetro</div>`+T(['Medición','Resultado típico'],[['Común – Marcha (C-R)','Resistencia menor'],['Común – Arranque (C-S)','Resistencia mayor'],['Marcha – Arranque (R-S)','Suma de las dos anteriores']],'wrap')});
+tbl({id:'tabla-conexiones-trafo',ab:'TΔ',name:'Conexiones de transformadores',desc:'Grupos vectoriales (Dyn11, Dyn1, Yyn0…), bancos de monofásicos, delta abierto y secundarios monofásicos.',kw:'transformador conexion grupo vectorial dyn11 dyn1 yyn0 delta estrella abierto banco monofasico x1 x2 x3 x4 polaridad',
+ html:()=>`<div class="h3">Grupos vectoriales trifásicos</div>`+T(['Grupo','Primario / Secundario','Desfase','Uso'],[['Dyn11','Δ / Y con neutro','+30° (secundario adelanta)','Distribución (norma IEC)'],['Dyn1','Δ / Y con neutro','−30° (secundario atrasa)','Distribución (norma ANSI / IEEE C57.12)'],['Dyn5','Δ / Y con neutro','150°','Distribución, algunos fabricantes'],['Yyn0','Y / Y con neutro','0°','Distribución; requiere núcleo de 3 columnas o terciario'],['YNyn0','Y aterrizada / Y aterrizada','0°','Redes multiaterrizadas (bancos en poste)'],['Yd1 / Yd11','Y / Δ','−30° / +30°','Elevadores de generación'],['Dd0','Δ / Δ','0°','Industria con cargas trifásicas, 3 hilos'],['Yzn11','Y / Zig-zag con neutro','+30°','Cargas desbalanceadas, puesta a tierra'],['Dzn0','Δ / Zig-zag con neutro','0°','Cargas desbalanceadas']],'wrap')
+  +`<div class="h3">Bancos de transformadores monofásicos</div>`+T(['Conexión','Secundario típico','Notas'],[['Y aterrizada – Y aterrizada (3 unid.)','120/208 V o 277/480 V, 4 hilos','La más común en redes de distribución en poste'],['Y – Δ (3 unid.)','240 V 3 hilos o 120/240 V 4 hilos','Neutro primario sin aterrizar (flotante)'],['Δ – Δ con derivación central (3 unid.)','120/240 V 4 hilos con fase alta','Una unidad más grande alimenta las cargas de 120 V'],['Delta abierto / estrella abierta (2 unid.)','120/240 V 4 hilos con fase alta','Capacidad = 86,6 % de las 2 unidades (57,7 % del banco de 3)'],['Y – Y (3 unid.) sin neutro','3 hilos','Evitar: tensiones de neutro inestables']],'wrap')
+  +`<div class="h3">Secundario de transformador monofásico</div>`+T(['Conexión','Bornes','Resultado'],[['Serie (fase partida)','Unir X2-X3 = neutro; fases en X1 y X4','120/240 V, 3 hilos'],['Paralelo','Unir X1-X3 y X2-X4','120 V, 2 hilos (doble corriente)'],['Con derivación central','X1 – X2 (neutro) – X3','120/240 V, 3 hilos']],'wrap')
+  +`<div class="note">Polaridad: aditiva (X1 diagonal a H1, típica ≤ 200 kVA y ≤ 8 660 V) o sustractiva (X1 adyacente a H1). Para conectar transformadores en paralelo deben coincidir relación de transformación, grupo vectorial / polaridad y secuencia de fases; la impedancia (Z %) debe ser similar (±7,5 %).</div>`
+  +`<div class="h3">Sistemas de tensión usuales</div>`+T(['Sistema','Hilos','Tensiones'],[['120/240 V monofásico','3 (L1, L2, N)','L-N 120 · L-L 240'],['120/208 V estrella','4 (L1, L2, L3, N)','L-N 120 · L-L 208'],['120/240 V delta con fase alta','4','L1-N 120 · L2-N 208 (fase alta) · L3-N 120 · L-L 240'],['277/480 V estrella','4','L-N 277 · L-L 480'],['240 V / 480 V delta','3','Solo L-L'],['7,62/13,2 kV estrella','MT','L-N 7 620 · L-L 13 200'],['14,4/24,9 kV estrella','MT','L-N 14 400 · L-L 24 900']],'wrap')});
+tbl({id:'tabla-nema',ab:'⏻',name:'Tomacorrientes NEMA',desc:'Configuraciones de clavijas y tomas más comunes.',kw:'nema enchufe tomacorriente clavija',
+ html:()=>T(['NEMA','Tensión','Corriente','Hilos'],[['5-15','125 V','15 A','2 + tierra'],['5-20','125 V','20 A','2 + tierra'],['6-15','250 V','15 A','2 + tierra'],['6-20','250 V','20 A','2 + tierra'],['6-30','250 V','30 A','2 + tierra'],['6-50','250 V','50 A','2 + tierra'],['14-30','125/250 V','30 A','3 + tierra'],['14-50','125/250 V','50 A','3 + tierra'],['L5-30','125 V','30 A','2 + tierra (traba)'],['L6-30','250 V','30 A','2 + tierra (traba)'],['L14-30','125/250 V','30 A','3 + tierra (traba)'],['L15-30','250 V 3φ','30 A','3 + tierra (traba)'],['L21-30','120/208 V 3φY','30 A','4 + tierra (traba)']])});
+tbl({id:'tabla-pinout',ab:'⎍',name:'Pinouts de conectores',desc:'RJ45 (T568A/B), USB, RS-232, RS-485 y HDMI.',kw:'pinout rj45 red ethernet usb rs232 rs485 hdmi db9',
+ html:()=>`<div class="h3">RJ45 — Ethernet</div>`+T(['Pin','T568A','T568B','10/100'],[[1,'Blanco-verde','Blanco-naranja','TX+'],[2,'Verde','Naranja','TX−'],[3,'Blanco-naranja','Blanco-verde','RX+'],[4,'Azul','Azul','—'],[5,'Blanco-azul','Blanco-azul','—'],[6,'Naranja','Verde','RX−'],[7,'Blanco-café','Blanco-café','—'],[8,'Café','Café','—']].map(r=>[String(r[0]),r[1],r[2],r[3]]))
+  +`<div class="note">Cable directo: mismo estándar en ambos extremos. Cable cruzado: T568A en un extremo y T568B en el otro.</div><div class="h3">USB 2.0 (tipo A)</div>`+T(['Pin','Señal','Color'],[['1','VBUS +5 V','Rojo'],['2','D−','Blanco'],['3','D+','Verde'],['4','GND','Negro']])
+  +`<div class="h3">RS-232 — DB9 (DTE)</div>`+T(['Pin','Señal'],[['1','DCD'],['2','RXD'],['3','TXD'],['4','DTR'],['5','GND'],['6','DSR'],['7','RTS'],['8','CTS'],['9','RI']])
+  +`<div class="h3">RS-485 (Modbus RTU)</div>`+T(['Terminal','Función'],[['A (D−)','Dato inversor'],['B (D+)','Dato no inversor'],['GND / C','Referencia común'],['120 Ω','Resistencia de terminación en los extremos']])
+  +`<div class="h3">HDMI tipo A</div>`+T(['Pin','Señal'],[['1','TMDS Data2+'],['2','Data2 blindaje'],['3','TMDS Data2−'],['4','TMDS Data1+'],['5','Data1 blindaje'],['6','TMDS Data1−'],['7','TMDS Data0+'],['8','Data0 blindaje'],['9','TMDS Data0−'],['10','TMDS Clock+'],['11','Clock blindaje'],['12','TMDS Clock−'],['13','CEC'],['14','Reservado / HEC'],['15','SCL (DDC)'],['16','SDA (DDC)'],['17','Tierra DDC/CEC'],['18','+5 V'],['19','Detección (HPD)']])});
+tbl({id:'formulario',ab:'ƒ',name:'Formulario eléctrico',desc:'Fórmulas más usadas en instalaciones eléctricas.',kw:'formulas formulario',
+ html:()=>{const F=(t,f)=>`<div class="h3" style="font-size:14px">${t}</div><div class="formula">${f}</div>`;return '<div class="card">'+
+  F('Ley de Ohm','V = I·R   ·   P = V·I = I²·R = V²/R')+F('Potencia monofásica','P = V·I·cosφ   S = V·I   Q = V·I·senφ')+F('Potencia trifásica','P = √3·VL·I·cosφ   S = √3·VL·I')+
+  F('Corriente de motor','I = (HP·746) / (√3·V·η·cosφ)')+F('Caída de tensión monofásica','ΔV = 2·I·L·(R·cosφ + X·senφ)')+F('Caída de tensión trifásica','ΔV = √3·I·L·(R·cosφ + X·senφ)')+
+  F('Resistencia de conductor','R = ρ·L / A   ·   R(T) = R20·[1 + α·(T − 20)]')+F('Corrección de FP','Qc = P·(tanφ1 − tanφ2)   ·   C = Qc / (2πf·V²)')+
+  F('Cortocircuito en transformador','Icc = In·100 / Z%')+F('Velocidad síncrona','ns = 120·f / p   ·   s = (ns − n)/ns')+F('Par','T (N·m) = 9550·P(kW) / n(rpm)')+
+  F('Reactancias','XL = 2πf·L   ·   XC = 1/(2πf·C)   ·   f0 = 1/(2π√(LC))')+F('Varilla de tierra (Dwight)','R = ρ/(2πL)·[ln(4L/a) − 1]')+F('Método de lúmenes','N = E·A / (Φ·CU·FM)')+
+  F('Energía','E (kWh) = P (kW) · t (h)')+'</div>'}});
+
+/* ============ CCTV ============ */
+const BR_CAM={'1':[2,1],'2':[4,2],'4':[6,3],'5':[8,4],'8':[12,6]};
+const HRES={'1':1280,'2':1920,'4':2560,'5':2592,'8':3840};
+const O_RES=[['2','2 MP (1080p)'],['4','4 MP'],['5','5 MP'],['8','8 MP (4K)'],['1','1 MP (720p)']];
+const HDD=[1,2,3,4,6,8,10,12,14,16,18,20,22];
+add({id:'cctv-almacenamiento',cat:'cctv',ab:'HDD',name:'Almacenamiento de grabación (NVR/DVR)',desc:'Discos duros necesarios según cámaras, resolución, compresión y días de grabación.',kw:'disco duro nvr dvr grabacion dias almacenamiento tb camaras',
+ inputs:[{id:'n',l:'Número de cámaras',d:'16'},{id:'res',l:'Resolución',t:'sel',o:O_RES,d:'4'},{id:'cod',l:'Compresión',t:'sel',o:[['h264','H.264'],['h265','H.265'],['h265p','H.265+']],d:'h265'},
+  {id:'fps',l:'Cuadros por segundo',u:'fps',d:'15'},{id:'q',l:'Movimiento en la escena',t:'sel',o:[['0.7','Bajo'],['1','Medio'],['1.4','Alto']],d:'1'},
+  {id:'h',l:'Horas de grabación por día',u:'h',d:'24',h:'Grabación por movimiento: use las horas reales de actividad (ej. 8–12 h)'},{id:'d',l:'Días de retención',u:'días',d:'30'},
+  {id:'bays',l:'Bahías de disco del NVR',t:'sel',o:[['1','1'],['2','2'],['4','4'],['8','8']],d:'2'},{id:'br',l:'Bitrate por cámara (opcional, del equipo)',u:'Mbps',opt:1,d:''}],
+ calc(v){let br=isFinite(v.br)?v.br:BR_CAM[v.res][v.cod==='h264'?0:1]*(v.cod==='h265p'?0.55:1)*Math.max(v.fps/25,0.3)*(+v.q);
+  const tot=br*v.n;const TB=tot*3600*v.h*v.d/8/1e6*1.1;const per=TB/(+v.bays);const hd=HDD.find(x=>x>=per);
+  return {rows:[['Almacenamiento necesario',fmt(TB,2)+' TB','main'],['Discos recomendados',hd?(v.bays+' × '+hd+' TB'):'Use un NVR con más bahías','main'],['Bitrate por cámara',fmt(br,2)+' Mbps'],['Ancho de banda total',fmt(tot,1)+' Mbps'],
+   ['Días reales con esos discos',hd?fmt(hd*v.bays/(TB/v.d),0)+' días':'—']],note:'Bitrates típicos a calidad media. Para mayor exactitud ingrese el bitrate configurado en la cámara. Incluye 10 % de reserva del sistema de archivos. Use discos para videovigilancia (WD Purple, Seagate SkyHawk).'}}});
+
+const POE_BUD=[30,60,65,120,130,190,250,370,400,740];
+add({id:'cctv-switch',cat:'cctv',ab:'PoE',name:'Switch PoE para cámaras',desc:'Puertos, presupuesto PoE y enlace de subida (uplink) del switch.',kw:'switch poe watts puertos uplink camaras ip',
+ inputs:[{id:'n',l:'Cámaras IP',d:'14'},{id:'br',l:'Bitrate por cámara',u:'Mbps',d:'4'},{id:'w',l:'Consumo por cámara',u:'W',d:'7',h:'Bala/domo típica 5–8 W · con IR o calefactor 12–13 W · PTZ 25–60 W'},
+  {id:'ow',l:'Otros equipos PoE (AP, teléfonos)',u:'W',d:'0'},{id:'op',l:'Puertos para esos equipos',d:'0'},{id:'res',l:'Puertos de reserva',u:'%',d:'20'}],
+ calc(v){const ports=Math.ceil((v.n+v.op)*(1+v.res/100));const sw=[4,8,16,24,48].find(x=>x>=ports);const W=(v.n*v.w+v.ow)*1.2;const bud=POE_BUD.find(x=>x>=W);const mb=v.n*v.br;
+  const up=mb<=70?'100 Mbps (mejor 1 Gbps)':mb<=700?'1 Gbps':'10 Gbps (SFP+)';
+  return {rows:[['Puertos PoE',sw?sw+' puertos':ports+' puertos (varios switches)','main'],['Presupuesto PoE mínimo',fmt(W,0)+' W → '+(bud?bud+' W':'varios switches'),'main'],['Tráfico total',fmt(mb,1)+' Mbps'],['Uplink al NVR',up],['Estándar por puerto',v.w<=12.95?'802.3af (PoE)':v.w<=25.5?'802.3at (PoE+)':v.w<=51?'802.3bt tipo 3':'802.3bt tipo 4']],
+   note:'Incluye 20 % de margen sobre la potencia. Mantenga la utilización del uplink por debajo del 70 %. Distancia máxima por cable UTP: 100 m (use extensores PoE para distancias mayores).'}}});
+
+add({id:'cctv-lente',cat:'cctv',ab:'DORI',name:'Lente, campo de visión y DORI',desc:'Ancho de escena, píxeles por metro y distancias de detección, observación, reconocimiento e identificación.',kw:'lente angulo campo vision dori pixeles por metro identificacion rostro placa distancia',
+ inputs:[{id:'res',l:'Resolución',t:'sel',o:O_RES,d:'4'},{id:'a',l:'Ángulo horizontal del lente',u:'°',d:'85',h:'Típico: 2,8 mm ≈ 100° · 3,6 mm ≈ 85° · 4 mm ≈ 80° · 6 mm ≈ 55° · 8 mm ≈ 40° · 12 mm ≈ 27° (vea la hoja técnica)'},{id:'d',l:'Distancia al objetivo',u:'m',d:'10'}],
+ calc(v){const H=HRES[v.res];const t=2*Math.tan(v.a/2*Math.PI/180);const w=v.d*t;const ppm=H/w;const lvl=ppm>=250?['Identificación','ok']:ppm>=125?['Reconocimiento','ok']:ppm>=62?['Observación','warn']:ppm>=25?['Detección','warn']:['Insuficiente','bad'];const D=p=>fmt(H/(p*t),1)+' m';
+  return {rows:[['Ancho de escena',fmt(w,1)+' m'],['Densidad',fmt(ppm,0)+' px/m','main'],['Nivel alcanzado',lvl[0],'main '+lvl[1]],['Identificación (250 px/m) hasta',D(250)],['Reconocimiento (125 px/m) hasta',D(125)],['Observación (62 px/m) hasta',D(62)],['Detección (25 px/m) hasta',D(25)]],
+   note:'Criterio DORI según IEC 62676-4. Para identificar rostros se recomiendan ≥ 250 px/m; para leer placas, ≥ 200–300 px/m con cámara dedicada (LPR).'}}});
+
+const O_CAB12=[['20.9','Siamés 18 AWG'],['33.3','Siamés 20 AWG'],['13.2','Dúplex 16 AWG'],['84.2','UTP: 1 hilo por polo (24 AWG)'],['42.1','UTP: 2 hilos por polo'],['21.05','UTP: 4 hilos por polo']];
+add({id:'cctv-12v',cat:'cctv',ab:'12V',name:'Fuente de 12 V y caída en el cable',desc:'Tensión que llega a la cámara, longitud máxima y fuente centralizada.',kw:'fuente 12v camaras analogicas siames caida voltaje alimentacion',
+ inputs:[{id:'I',l:'Consumo por cámara',u:'A',d:'0.5'},{id:'cab',l:'Cable de alimentación',t:'sel',o:O_CAB12,d:'20.9'},{id:'L',l:'Distancia fuente – cámara',u:'m',d:'60'},{id:'V',l:'Tensión de la fuente',u:'V',d:'12'},{id:'n',l:'Cámaras en la fuente',d:'8'}],
+ calc(v){const R=+v.cab/1000;const dV=2*v.I*v.L*R;const Vc=v.V-dV;const Lmax=(v.V-10.8)/(2*v.I*R);const fa=v.n*v.I*1.25;
+  return {rows:[['Tensión en la cámara',fmt(Vc,2)+' V','main '+(Vc>=10.8?'ok':'bad')],['Caída',fmt(dV,2)+' V ('+fmt(dV/v.V*100,1)+' %)'],['Longitud máxima (≥ 10,8 V)',fmt(Lmax,0)+' m'],['Fuente centralizada',fmt(fa,1)+' A mín.','main']],
+   note:'Las cámaras de 12 V suelen tolerar ±10 % (10,8 V). Con IR encendido el consumo aumenta: use el valor nocturno de la hoja técnica. Para distancias largas use fuentes de 24 VAC o PoE.'}}});
+
+tbl({id:'tabla-cctv',cat:'cctv',ab:'☰',name:'Tablas de CCTV',desc:'Resoluciones, estándares PoE, niveles DORI y lentes típicos.',kw:'resoluciones poe dori lentes tabla cctv',
+ html:()=>`<div class="h3">Resoluciones</div>`+T(['Nombre','Píxeles','MP'],[['720p (HD)','1280 × 720','1'],['1080p (Full HD)','1920 × 1080','2'],['4 MP (2K)','2560 × 1440','4'],['5 MP','2592 × 1944','5'],['4K (8 MP)','3840 × 2160','8'],['12 MP','4000 × 3000','12']])
+  +`<div class="h3">Estándares PoE</div>`+T(['Estándar','En el switch','En el equipo','Pares'],[['802.3af (PoE)','15,4 W','12,95 W','2'],['802.3at (PoE+)','30 W','25,5 W','2'],['802.3bt tipo 3','60 W','51 W','4'],['802.3bt tipo 4','90 W','71,3 W','4']])
+  +`<div class="h3">DORI (IEC 62676-4)</div>`+T(['Nivel','px/m','Uso'],[['Detección','25','Saber si hay una persona'],['Observación','62','Ver la actividad y vestimenta'],['Reconocimiento','125','Reconocer a alguien conocido'],['Identificación','250','Identificar a una persona sin duda']],'wrap')
+  +`<div class="h3">Lentes típicos (sensor 1/2,8" – 1/3")</div>`+T(['Lente','Ángulo H','Uso'],[['2,8 mm','≈ 100°','Interiores amplios'],['3,6 mm','≈ 85°','Uso general'],['4 mm','≈ 80°','Uso general'],['6 mm','≈ 55°','Pasillos, entradas'],['8 mm','≈ 40°','Accesos a distancia'],['12 mm','≈ 27°','Portones, perímetros'],['2,8–12 mm varifocal','100° – 30°','Ajustable en sitio']],'wrap')
+  +`<div class="h3">Distancias máximas de transmisión</div>`+T(['Medio','Distancia'],[['UTP Cat5e/Cat6 (IP/PoE)','100 m'],['Coaxial RG59 HD analógico (TVI/CVI/AHD)','≈ 300–500 m según resolución'],['UTP con balun pasivo (analógico HD)','≈ 200–300 m'],['Fibra multimodo','≈ 550 m (1 Gbps)'],['Fibra monomodo','10 km o más']],'wrap')});
+
+/* ============ VOZ Y DATOS ============ */
+add({id:'red-cableado',cat:'redes',ab:'UTP',name:'Cableado estructurado: cable y materiales',desc:'Cajas de cable de 305 m, jacks, patch panels, patch cords y placas para un proyecto.',kw:'cableado estructurado utp cat6 cajas bobinas 305 jacks patch panel patch cord placas puntos red',
+ inputs:[{id:'n',l:'Número de puntos de red',d:'48'},{id:'mn',l:'Distancia al punto más cercano',u:'m',d:'12'},{id:'mx',l:'Distancia al punto más lejano',u:'m',d:'65'},{id:'hol',l:'Holgura por punto',u:'m',d:'3'},
+  {id:'pp',l:'Puntos por placa',t:'sel',o:[['1','Sencilla'],['2','Doble']],d:'2'},{id:'cat',l:'Categoría',t:'sel',o:[['Cat 6','Cat 6'],['Cat 6A','Cat 6A'],['Cat 5e','Cat 5e']],d:'Cat 6'}],
+ calc(v){const avg=(v.mn+v.mx)/2*1.1+v.hol;const rpb=Math.floor(305/avg);if(rpb<1)return {error:'La longitud promedio supera los 305 m de una caja.'};const box=Math.ceil(v.n/rpb);const pan=Math.ceil(v.n/24);
+  const r=[['Cajas de cable '+v.cat+' (305 m)',box,'main'],['Longitud promedio por corrida',fmt(avg,1)+' m'],['Corridas por caja',rpb],['Cable total estimado',fmt(v.n*avg,0)+' m'],
+   ['Jacks '+v.cat+' (puestos de trabajo)',v.n],['Patch panels de 24 puertos',pan],['Organizadores horizontales',pan],['Patch cords de rack (1 m)',v.n],['Patch cords de estación (2–3 m)',v.n],['Placas de pared',Math.ceil(v.n/(+v.pp))]];
+  if(v.mx+v.hol>90)r.push(['¡Atención!','El punto más lejano supera 90 m de enlace','bad']);
+  return {rows:r,note:'Método de la longitud promedio (BICSI): promedio = (mín + máx)/2 × 1,1 + holgura. Enlace permanente máximo 90 m + 10 m de patch cords = 100 m (TIA-568). Agregue etiquetas, amarres de velcro y cuente los puntos de cámaras, AP y teléfonos.'}}});
+
+const RACKU=[6,9,12,15,18,22,24,27,32,36,42,45,48];
+add({id:'red-rack',cat:'redes',ab:'U',name:'Tamaño del rack',desc:'Unidades de rack (U) necesarias para los equipos con reserva.',kw:'rack gabinete unidades u tamaño',
+ inputs:[{id:'pp',l:'Patch panels (1U)',d:'2'},{id:'org',l:'Organizadores (1U o 2U c/u)',d:'2'},{id:'sw',l:'Switches (1U)',d:'2'},{id:'nvr',l:'NVR / servidores',u:'U',d:'2'},{id:'ups',l:'UPS de rack',u:'U',d:'2'},{id:'otro',l:'Bandejas, multitoma, otros',u:'U',d:'2'},{id:'res',l:'Reserva',u:'%',d:'30'}],
+ calc(v){const U=v.pp+v.org+v.sw+v.nvr+v.ups+v.otro;const R=Math.ceil(U*(1+v.res/100));const r=RACKU.find(x=>x>=R);
+  return {rows:[['Rack recomendado',r?r+' U':'> 48 U (2 racks)','main'],['Unidades ocupadas',U+' U'],['Con reserva',R+' U'],['Tipo',r&&r<=12?'Gabinete de pared':'Rack de piso / gabinete cerrado']],note:'1 U = 44,45 mm. Para switches PoE y NVR deje ventilación; en racks cerrados considere ventiladores en el techo.'}}});
+
+add({id:'red-subred',cat:'redes',ab:'IP',name:'Calculadora de subred IP',desc:'Red, máscara, broadcast y rango de direcciones para cámaras, NVR y equipos.',kw:'ip subred mascara cidr gateway rango direcciones broadcast hosts',
+ inputs:[{id:'ip',l:'Dirección IP / prefijo',t:'text',d:'192.168.1.64/24',h:'Ejemplos: 192.168.1.64/24 · 10.0.0.10 255.255.255.0'}],
+ calc(v){const s=String(v.ip||'').trim();let m=s.match(/^(\d+\.\d+\.\d+\.\d+)\s*(?:\/\s*(\d+)|\s+(\d+\.\d+\.\d+\.\d+))?$/);if(!m)return {error:'Escriba la IP como 192.168.1.10/24.'};
+  const p4=x=>{const a=x.split('.').map(Number);if(a.some(n=>n>255))return null;return ((a[0]<<24)|(a[1]<<16)|(a[2]<<8)|a[3])>>>0};const ip=p4(m[1]);if(ip===null)return {error:'IP no válida.'};
+  let pre;if(m[2]!==undefined)pre=+m[2];else if(m[3]){const mk=p4(m[3]);if(mk===null)return {error:'Máscara no válida.'};pre=mk.toString(2).replace(/0+$/,'').length;if(!/^1*0*$/.test(mk.toString(2).padStart(32,'0')))return {error:'Máscara no válida.'}}else pre=24;
+  if(pre>32)return {error:'Prefijo no válido.'};const mask=pre===0?0:(0xFFFFFFFF<<(32-pre))>>>0;const net=(ip&mask)>>>0,bc=(net|(~mask>>>0))>>>0;const ts=n=>[n>>>24,(n>>>16)&255,(n>>>8)&255,n&255].join('.');
+  const hosts=pre>=31?(pre===32?1:2):Math.pow(2,32-pre)-2;const priv=(ip>>>24)===10||((ip>>>20)===0xAC1)||((ip>>>16)===0xC0A8);
+  return {rows:[['Red',ts(net)+'/'+pre,'main'],['Máscara',ts(mask)],['Primera IP utilizable',ts(pre>=31?net:net+1)],['Última IP utilizable',ts(pre>=31?bc:bc-1)],['Broadcast',ts(bc)],['Equipos posibles',fmt(hosts,0),'main'],['Tipo',priv?'Privada':'Pública']],
+   note:'Sugerencia de orden: .1 gateway/router · .2–.20 switches y equipos de red · .50–.99 NVR y servidores · .100 en adelante cámaras, reservando el rango DHCP para los usuarios.'}}});
+
+const O_FIB=[['3.0','Multimodo 850 nm (3,0 dB/km)'],['1.0','Multimodo 1300 nm (1,0 dB/km)'],['0.4','Monomodo 1310 nm (0,4 dB/km)'],['0.3','Monomodo 1550 nm (0,3 dB/km)']];
+add({id:'red-fibra',cat:'redes',ab:'dB',name:'Presupuesto de pérdidas de fibra óptica',desc:'Pérdida total del enlace por fibra, conectores y empalmes, y margen disponible.',kw:'fibra optica perdidas atenuacion empalmes conectores db enlace otdr',
+ inputs:[{id:'f',l:'Tipo de fibra y longitud de onda',t:'sel',o:O_FIB,d:'0.4'},{id:'L',l:'Longitud del enlace',u:'m',d:'800'},{id:'c',l:'Pares de conectores',d:'2'},{id:'cl',l:'Pérdida por par de conectores',u:'dB',d:'0.75',h:'Máximo TIA 0,75 dB · típico 0,3 dB'},
+  {id:'e',l:'Empalmes por fusión',d:'2'},{id:'el',l:'Pérdida por empalme',u:'dB',d:'0.3'},{id:'b',l:'Presupuesto del transceptor (opcional)',u:'dB',opt:1,d:''}],
+ calc(v){const Lf=v.L/1000*(+v.f);const tot=Lf+v.c*v.cl+v.e*v.el;const r=[['Pérdida total del enlace',fmt(tot,2)+' dB','main'],['Por la fibra',fmt(Lf,2)+' dB'],['Por conectores',fmt(v.c*v.cl,2)+' dB'],['Por empalmes',fmt(v.e*v.el,2)+' dB']];
+  if(isFinite(v.b)){const mg=v.b-tot;r.push(['Margen disponible',fmt(mg,2)+' dB','main '+(mg>=3?'ok':mg>=0?'warn':'bad')])}
+  return {rows:r,note:'Use este valor como límite de aceptación al certificar con power meter u OTDR. Se recomienda dejar al menos 3 dB de margen.'}}});
+
+add({id:'red-poe-cable',cat:'redes',ab:'W',name:'PoE: pérdida en el cable UTP',desc:'Potencia que llega al equipo según la distancia y la categoría del cable.',kw:'poe perdida cable distancia potencia ap telefono camara',
+ inputs:[{id:'std',l:'Estándar PoE',t:'sel',o:[['af','802.3af'],['at','802.3at'],['bt','802.3bt']],d:'at'},{id:'P',l:'Consumo del equipo',u:'W',d:'20'},{id:'L',l:'Longitud del cable',u:'m',d:'90'},{id:'cat',l:'Cable',t:'sel',o:[['0.094','Cat 5e (24 AWG)'],['0.075','Cat 6 (23 AWG)']],d:'0.075'}],
+ calc(v){const Vs={af:44,at:50,bt:50}[v.std];const pairs=v.std==='bt'?2:1;const Rloop=2*v.L*(+v.cat)/2/pairs;let I=v.P/Vs;for(let k=0;k<20;k++)I=v.P/(Vs-I*Rloop);const loss=I*I*Rloop;const PSE=v.P+loss;
+  const max={af:15.4,at:30,bt:60}[v.std];return {rows:[['Potencia requerida en el switch',fmt(PSE,1)+' W','main '+(PSE<=max?'ok':'bad')],['Pérdida en el cable',fmt(loss,2)+' W'],['Corriente',fmt(I*1000,0)+' mA'],['Máximo del estándar por puerto',max+' W']],
+   note:'Cálculo con la tensión mínima del switch y resistencia del conductor a 20 °C. En mazos grandes de cables con PoE alto aumenta la temperatura (TIA TSB-184-A).'}}});
+
+tbl({id:'tabla-redes',cat:'redes',ab:'☰',name:'Tablas de voz y datos',desc:'Categorías de cable, fibra (OM/OS), colores de fibra y distancias.',kw:'categorias cable cat6 cat6a fibra om3 om4 os2 colores tia 598 distancias',
+ html:()=>{const sw=c=>`<span class="sw" style="background:${c}"></span>`;return `<div class="h3">Cable de cobre (TIA-568)</div>`+T(['Categoría','Ancho de banda','Velocidad','Distancia'],[['Cat 5e','100 MHz','1 Gbps','100 m'],['Cat 6','250 MHz','1 Gbps (10 G a 37–55 m)','100 m'],['Cat 6A','500 MHz','10 Gbps','100 m'],['Cat 8','2 000 MHz','25/40 Gbps','30 m']],'wrap')
+  +`<div class="h3">Fibra óptica: distancias</div>`+T(['Tipo','Núcleo','1 Gbps','10 Gbps','Color'],[['OM1','62,5 µm','275 m','33 m',sw('#f07d00')+'Naranja'],['OM2','50 µm','550 m','82 m',sw('#f07d00')+'Naranja'],['OM3','50 µm','550 m','300 m',sw('#3fc6c6')+'Aqua'],['OM4','50 µm','550 m','400 m',sw('#3fc6c6')+'Aqua / '+sw('#b54fd1')+'violeta'],['OM5','50 µm','550 m','400 m',sw('#a8d93c')+'Verde lima'],['OS2','9 µm','5–10 km','10 km (LR)',sw('#f4d000')+'Amarillo']],'wrap')
+  +`<div class="h3">Código de colores de fibras (TIA-598)</div>`+T(['N.º','Color','N.º','Color'],[[1,'Azul',7,'Rojo'],[2,'Naranja',8,'Negro'],[3,'Verde',9,'Amarillo'],[4,'Café',10,'Violeta'],[5,'Gris',11,'Rosado'],[6,'Blanco',12,'Aqua']].map(r=>[String(r[0]),r[1],String(r[2]),r[3]]))
+  +`<div class="h3">Conectores de fibra</div>`+T(['Conector','Uso'],[['LC','Transceptores SFP/SFP+, alta densidad'],['SC','Distribuidores (ODF), FTTH'],['ST','Instalaciones antiguas multimodo'],['UPC (azul) / APC (verde)','Pulido; APC para FTTH y video RF; no mezclar']],'wrap')
+  +`<div class="h3">Límites del cableado horizontal</div>`+T(['Elemento','Máximo'],[['Enlace permanente','90 m'],['Canal completo (con patch cords)','100 m'],['Radio de curvatura UTP','4 × diámetro del cable'],['Destrenzado en la terminación (Cat 6)','≤ 13 mm'],['Separación de cables de energía','Según TIA-569 / NEC 800 (≥ 5 cm con barrera, más sin ella)']],'wrap')}});
+
+/* ============ CONTRA INCENDIOS ============ */
+const HT_RED=[[3.0,1],[3.7,0.91],[4.3,0.84],[4.9,0.77],[5.5,0.71],[6.1,0.64],[6.7,0.58],[7.3,0.52],[7.9,0.46],[8.5,0.40],[9.1,0.34]];
+add({id:'fi-detectores',cat:'incendio',ab:'◉',name:'Cantidad de detectores (NFPA 72)',desc:'Detectores de humo o temperatura para un local de techo liso.',kw:'detectores humo temperatura cantidad espaciamiento nfpa 72 alarma',
+ inputs:[{id:'tp',l:'Tipo de detector',t:'sel',o:[['humo','Humo'],['temp','Temperatura']],d:'humo'},{id:'L',l:'Largo del local',u:'m',d:'20'},{id:'W',l:'Ancho del local',u:'m',d:'12'},{id:'H',l:'Altura del techo',u:'m',d:'3'},
+  {id:'S',l:'Espaciamiento listado',u:'m',d:'9.1',h:'Humo: 9,1 m (30 pies) en techo liso · Temperatura: el listado del fabricante (9,1 o 15,2 m)'}],
+ calc(v){let f=1;if(v.tp==='temp'){f=0;for(const r of HT_RED){if(v.H<=r[0]){f=r[1];break}}if(!f)return {error:'Para techos de más de 9,1 m use detectores de humo lineales o de aspiración.'}}
+  const S=v.S*f;const nx=Math.ceil(v.L/S-1e-9),ny=Math.ceil(v.W/S-1e-9);const N=nx*ny;
+  return {rows:[['Detectores necesarios',N,'main'],['Distribución',nx+' × '+ny],['Separación real',fmt(v.L/nx,2)+' m × '+fmt(v.W/ny,2)+' m'],['Distancia a la pared',fmt(v.L/nx/2,2)+' m × '+fmt(v.W/ny/2,2)+' m'],['Espaciamiento de diseño',fmt(S,2)+' m'+(f<1?' (reducido por altura × '+fmt(f,2)+')':'')]],
+   note:'NFPA 72: distancia a paredes ≤ S/2 y todo punto del techo a ≤ 0,7 S de un detector. Reduzca el espaciamiento en techos con vigas, inclinados o con alto flujo de aire (A/C). No instale detectores de humo a menos de 0,9 m de difusores de aire.'}}});
+
+const BAT_FI=[4,7,12,18,26,33,40,55,75,100];
+add({id:'fi-baterias',cat:'incendio',ab:'Ah',name:'Baterías del panel de alarma',desc:'Capacidad de baterías para 24 h en reposo + alarma (NFPA 72).',kw:'baterias panel alarma incendio standby reposo ah nfpa 72',
+ inputs:[{id:'L',l:'Equipos: nombre ; cantidad ; reposo mA ; alarma mA',t:'area',d:'Panel de control; 1; 120; 350\nDetector de humo; 30; 0.3; 0.3\nEstación manual; 6; 0.3; 0.3\nMódulo de monitoreo; 4; 0.4; 0.4\nSirena con estrobo; 10; 0; 90'},
+  {id:'h',l:'Horas en reposo',u:'h',d:'24'},{id:'m',l:'Minutos en alarma',u:'min',d:'5',h:'5 min para alarma general · 15 min para evacuación por voz'},{id:'fs',l:'Factor de seguridad',u:'%',d:'20'}],
+ calc(v){const it=parseLines(v.L).map(r=>({n:r[0],q:num(r[1]),s:num(r[2]),a:num(r[3])})).filter(r=>isFinite(r.q)&&isFinite(r.s)&&isFinite(r.a));if(!it.length)return {error:'Escriba los equipos: nombre; cantidad; reposo mA; alarma mA.'};
+  const Is=it.reduce((s,r)=>s+r.q*r.s,0)/1000,Ia=it.reduce((s,r)=>s+r.q*r.a,0)/1000;const Ah=(Is*v.h+Ia*v.m/60)*(1+v.fs/100);const b=BAT_FI.find(x=>x>=Ah);
+  return {html:T(['Equipo','Cant.','Reposo mA','Alarma mA'],it.map(r=>[esc(r.n),r.q,+(r.q*r.s).toFixed(2),+(r.q*r.a).toFixed(2)])),
+   rows:[['Capacidad requerida',fmt(Ah,1)+' Ah','main'],['Baterías recomendadas',b?'2 × 12 V '+b+' Ah (24 V)':'Use fuente auxiliar o gabinete de baterías','main'],['Corriente en reposo',fmt(Is,3)+' A'],['Corriente en alarma',fmt(Ia,3)+' A']],
+   note:'NFPA 72 (10.6.7): 24 h de reposo + 5 min de alarma (15 min con evacuación por voz). Use los consumos de las hojas técnicas y verifique la capacidad máxima de carga del panel.'}}});
+
+const O_NAC=[['20.9','18 AWG'],['13.2','16 AWG'],['8.28','14 AWG'],['5.21','12 AWG']];
+add({id:'fi-nac',cat:'incendio',ab:'NAC',name:'Caída de tensión en circuito de sirenas (NAC)',desc:'Tensión en el último dispositivo de notificación con batería al final de su descarga.',kw:'nac sirenas estrobos caida tension circuito notificacion calibre',
+ inputs:[{id:'I',l:'Corriente total del circuito',u:'A',d:'1.2'},{id:'L',l:'Distancia al último dispositivo',u:'m',d:'120'},{id:'cal',l:'Calibre del cable',t:'sel',o:O_NAC,d:'8.28'},{id:'Vi',l:'Tensión mínima de la fuente',u:'V',d:'20.4',h:'85 % de 24 V = 20,4 V (batería descargada)'},{id:'Vd',l:'Tensión mínima de los dispositivos',u:'V',d:'16'}],
+ calc(v){const dV=2*v.I*v.L*(+v.cal)/1000;const Vf=v.Vi-dV;const Lmax=(v.Vi-v.Vd)/(2*v.I*(+v.cal)/1000);
+  return {rows:[['Tensión en el último dispositivo',fmt(Vf,2)+' V','main '+(Vf>=v.Vd?'ok':'bad')],['Caída de tensión',fmt(dV,2)+' V'],['Longitud máxima con este calibre',fmt(Lmax,0)+' m'],['Resultado',Vf>=v.Vd?'Cumple':'No cumple: aumente el calibre o divida el circuito',Vf>=v.Vd?'ok':'bad']],
+   note:'Cálculo conservador con toda la carga concentrada al final del circuito. Verifique la corriente máxima por circuito NAC del panel (típicamente 1,5–3 A).'}}});
+
+const SPK={l:{n:'Riesgo ligero',a:20.9,s:4.6,d:4.1,da:139,hose:100,t:30},o1:{n:'Ordinario grupo 1',a:12.1,s:4.6,d:6.1,da:139,hose:250,t:60},o2:{n:'Ordinario grupo 2',a:12.1,s:4.6,d:8.1,da:139,hose:250,t:60},e1:{n:'Extra grupo 1',a:9.3,s:3.7,d:12.2,da:232,hose:500,t:90},e2:{n:'Extra grupo 2',a:9.3,s:3.7,d:16.3,da:232,hose:500,t:120}};
+const O_RIESGO=[['l','Ligero'],['o1','Ordinario 1'],['o2','Ordinario 2'],['e1','Extra 1'],['e2','Extra 2']];
+add({id:'fi-rociadores',cat:'incendio',ab:'💧',name:'Rociadores y demanda de agua (NFPA 13)',desc:'Cantidad de rociadores, caudal de diseño, reserva de agua y presión en el rociador.',kw:'rociadores sprinklers nfpa 13 densidad caudal tanque cisterna reserva agua riesgo',
+ inputs:[{id:'r',l:'Clasificación de riesgo',t:'sel',o:O_RIESGO,d:'l'},{id:'L',l:'Largo del área',u:'m',d:'30'},{id:'W',l:'Ancho del área',u:'m',d:'20'},{id:'K',l:'Factor K del rociador',u:'gpm/psi½',d:'5.6',h:'K 5.6 (K80 métrico) es el más común'}],
+ calc(v){const s=SPK[v.r];const A=v.L*v.W;const N=Math.max(Math.ceil(A/s.a-1e-9),Math.ceil(v.L/s.s-1e-9)*Math.ceil(v.W/s.s-1e-9));const cov=A/N;
+  const da=Math.min(s.da,A);const Qs=s.d*da;const Qh=s.hose*3.785;const Qt=Qs+Qh;const vol=Qt*s.t/1000;
+  const qs_gpm=s.d*Math.min(cov,s.a)/3.785;const P=Math.max(Math.pow(qs_gpm/v.K,2),7);
+  return {rows:[['Rociadores',N,'main'],['Cobertura por rociador',fmt(cov,1)+' m² (máx. '+s.a+' m²)'],['Separación máxima',s.s+' m'],['Densidad de diseño',fmt(s.d,1)+' mm/min sobre '+fmt(da,0)+' m²'],
+   ['Caudal de rociadores',fmt(Qs,0)+' L/min ('+fmt(Qs/3.785,0)+' gpm)'],['Caudal de mangueras',fmt(Qh,0)+' L/min ('+s.hose+' gpm)'],['Demanda total',fmt(Qt,0)+' L/min ('+fmt(Qt/3.785,0)+' gpm)','main'],
+   ['Reserva de agua ('+s.t+' min)',fmt(vol,1)+' m³','main'],['Presión mínima en el rociador más lejano',fmt(P,1)+' psi ('+fmt(P*0.0689,2)+' bar)']],
+   note:'Referencia NFPA 13 (rociadores estándar, método de densidad/área en el punto más desfavorable de la curva). El diseño definitivo requiere cálculo hidráulico completo (pérdidas por fricción, altura y curva de la bomba) y la aprobación de la autoridad competente (Benemérito Cuerpo de Bomberos).'}}});
+
+const O_EXT=[['2','2-A'],['3','3-A'],['4','4-A'],['6','6-A'],['10','10-A'],['20','20-A']];
+add({id:'fi-extintores',cat:'incendio',ab:'🧯',name:'Cantidad de extintores (NFPA 10)',desc:'Extintores clase A según el área, el riesgo y la clasificación del extintor.',kw:'extintores cantidad nfpa 10 distancia recorrido pqs abc',
+ inputs:[{id:'r',l:'Riesgo',t:'sel',o:[['l','Ligero'],['o','Ordinario'],['e','Extra']],d:'o'},{id:'A',l:'Área del piso',u:'m²',d:'800'},{id:'k',l:'Clasificación A del extintor',t:'sel',o:O_EXT,d:'4',h:'Polvo químico ABC 10 lb ≈ 4-A · 20 lb ≈ 10-A (vea la etiqueta)'}],
+ calc(v){const t={l:[2,279],o:[2,139],e:[4,93]}[v.r];const per=Math.min(+v.k*t[1],1045);const N=Math.ceil(v.A/per-1e-9);
+  return {rows:[['Extintores mínimos',N,'main'],['Área por extintor',fmt(per,0)+' m²'],['Clasificación mínima para este riesgo',t[0]+'-A',+v.k>=t[0]?'ok':'bad'],['Distancia máxima de recorrido (clase A)','22,9 m']],
+   note:'NFPA 10: además del área, ninguna persona debe recorrer más de 22,9 m hasta un extintor clase A (15,25 m para clase B en riesgo extra, 9,15 m en clase K). La distancia de recorrido suele exigir más unidades que el cálculo por área. Altura máxima de la manija: 1,53 m (≤ 18 kg).'}}});
+
+tbl({id:'tabla-incendio',cat:'incendio',ab:'☰',name:'Tablas contra incendios',desc:'Clases de fuego, clasificación de riesgos NFPA 13, tipos de detectores y reducción por altura.',kw:'clases fuego riesgo nfpa 13 detectores tipos altura tabla incendio',
+ html:()=>`<div class="h3">Clases de fuego y agentes</div>`+T(['Clase','Material','Agente'],[['A','Sólidos comunes: madera, papel, tela','Agua, espuma, polvo ABC'],['B','Líquidos y gases inflamables','CO₂, polvo BC/ABC, espuma'],['C','Equipos eléctricos energizados','CO₂, polvo ABC, agente limpio'],['D','Metales combustibles','Polvo clase D'],['K','Aceites de cocina','Agente húmedo (acetato de potasio)']],'wrap')
+  +`<div class="h3">Clasificación de riesgos (NFPA 13)</div>`+T(['Riesgo','Densidad / área','Ejemplos'],[['Ligero','4,1 mm/min / 139 m²','Oficinas, escuelas, iglesias, hospitales, comedores'],['Ordinario 1','6,1 mm/min / 139 m²','Estacionamientos, panaderías, lavanderías, procesamiento de alimentos'],['Ordinario 2','8,1 mm/min / 139 m²','Bodegas de mercadería general, talleres, textiles, comercio'],['Extra 1','12,2 mm/min / 232 m²','Imprentas, aserraderos, tapicería con espumas'],['Extra 2','16,3 mm/min / 232 m²','Líquidos inflamables, pintura por aspersión']],'wrap')
+  +`<div class="h3">Tipos de detectores</div>`+T(['Detector','Aplicación'],[['Humo fotoeléctrico','Uso general; fuegos lentos con humo visible'],['Humo iónico','Fuegos rápidos con partículas pequeñas (en desuso)'],['Temperatura fija (57 °C / 88 °C)','Cocinas, cuartos de máquinas, ambientes con polvo'],['Termovelocimétrico','Aumento rápido de temperatura (≈ 8 °C/min)'],['Haz lineal (beam)','Naves y bodegas de techo alto'],['Aspiración (VESDA)','Centros de datos, salas limpias, techos altos'],['Llama (UV/IR)','Combustibles líquidos, áreas abiertas'],['Ducto','Retorno de unidades de A/C > 2 000 CFM']],'wrap')
+  +`<div class="h3">Reducción del espaciamiento de detectores de temperatura por altura</div>`+T(['Altura hasta','Factor'],HT_RED.map(r=>[fmt(r[0],1)+' m',String(r[1]).replace('.',',')]))});
+
+/* ============ App ============ */
+{const i=CALCS.findIndex(c=>c.id==='identificar-sistema');CALCS.unshift(CALCS.splice(i,1)[0])}
+const ALL=CALCS;
+let favs=new Set(store.get('favs',[]));let hist=store.get('hist',[]);let recent=store.get('recent',[]);
+const catOf=id=>CATS.find(c=>c.id===id);
+function setTheme(t){document.documentElement.setAttribute('data-theme',t);store.set('theme',t)}
+setTheme(store.get('theme',matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
+$('#themeBtn').onclick=()=>setTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');
+const stack=[location.hash.slice(1)];
+function go(h){location.hash=h}
+function goBack(fallback){if(stack.length>1){history.back()}else{history.replaceState(null,'',location.pathname+location.search+(fallback?'#'+fallback:''));stack[0]=fallback||'';route()}}
+const norm=s=>String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+
+function renderNav(view){const t=[['','🏠','Inicio'],['favoritos','★','Favoritos'],['historial','🕘','Historial']];
+ $('#tabs').innerHTML=t.map(([h,i,n])=>`<button data-h="${h}" class="${view===h?'on':''}"><span class="ti">${i}</span>${n}</button>`).join('');
+ $('#tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{$('#q').value='';history.replaceState(null,'',location.pathname+location.search+(b.dataset.h?'#'+b.dataset.h:''));stack.length=0;stack.push(b.dataset.h);route()})}
+function itemHTML(c){const cat=catOf(c.cat);return `<a class="item" href="#${c.id}" data-go="${c.id}"><div class="ico" style="background:${cat.color}">${esc(c.ab||'')}</div><div class="t"><b>${esc(c.name)}${favs.has(c.id)?' <span style="color:var(--acc)">★</span>':''}</b><span>${esc(c.desc)}</span></div><div class="chev">›</div></a>`}
+function bindGo(){$('#main').querySelectorAll('[data-go]').forEach(a=>a.onclick=e=>{e.preventDefault();go(a.dataset.go)})}
+function showHeader(home){document.body.classList.toggle('home',!!home)}
+function renderHome(){showHeader(true);setBar(null);const q=norm($('#q').value.trim());let html='';
+ if(q){const r=ALL.filter(c=>norm(c.name+' '+c.desc+' '+(c.kw||'')+' '+catOf(c.cat).name).includes(q));
+  html=`<div class="sec-title">Resultados (${r.length})</div>`+(r.length?`<div class="list">${r.map(itemHTML).join('')}</div>`:`<div class="list"><div class="empty">Sin resultados para “${esc(q)}”.</div></div>`)}
+ else{const fv=ALL.filter(c=>favs.has(c.id));const rc=recent.map(id=>ALL.find(c=>c.id===id)).filter(Boolean).slice(0,6);
+  if(fv.length)html+=`<div class="sec-title">Favoritos</div><div class="chips">${fv.map(c=>`<a class="chip" href="#${c.id}" data-go="${c.id}"><span class="dot" style="background:${catOf(c.cat).color}"></span>${esc(c.name)}</a>`).join('')}</div>`;
+  if(rc.length)html+=`<div class="sec-title">Usados recientemente</div><div class="chips">${rc.map(c=>`<a class="chip" href="#${c.id}" data-go="${c.id}"><span class="dot" style="background:${catOf(c.cat).color}"></span>${esc(c.name)}</a>`).join('')}</div>`;
+  html+=`<div class="sec-title">Secciones</div><div class="tiles">${CATS.map(c=>{const n=ALL.filter(x=>x.cat===c.id).length;return `<a class="tile" href="#sec-${c.id}" data-go="sec-${c.id}" style="--c:${c.color}"><span class="tem">${c.em}</span><b>${c.name}</b><small>${n} herramientas</small></a>`}).join('')}</div>`}
+ html+=`<div class="install">Instálela en su Android: abra este enlace en Chrome → menú ⋮ → <b>Agregar a pantalla de inicio</b>.<br>Cálculos de referencia; verifique siempre con la norma vigente.</div>`;
+ $('#main').innerHTML=html;bindGo()}
+function renderSection(c){showHeader(false);setBar(null);const list=ALL.filter(x=>x.cat===c.id);
+ $('#main').innerHTML=`<button class="back" id="back">‹ Inicio</button><div class="sechead" style="--c:${c.color}"><span class="tem">${c.em}</span><div><h1>${c.name}</h1><small>${list.length} herramientas</small></div></div><div class="list">${list.map(itemHTML).join('')}</div>`;
+ $('#back').onclick=()=>goBack('');bindGo();window.scrollTo(0,0)}
+function renderFavs(){showHeader(false);setBar(null);const f=ALL.filter(c=>favs.has(c.id));
+ $('#main').innerHTML=`<div class="sechead" style="--c:var(--acc)"><span class="tem">★</span><div><h1>Favoritos</h1><small>${f.length} guardados</small></div></div>`+(f.length?`<div class="list">${f.map(itemHTML).join('')}</div>`:`<div class="list"><div class="empty">Toque la ☆ dentro de cualquier herramienta para tenerla a mano aquí.</div></div>`);bindGo()}
+function renderHist(){showHeader(false);setBar(null);
+ $('#main').innerHTML=`<div class="sechead" style="--c:#53606f"><span class="tem">🕘</span><div><h1>Historial</h1><small>Resultados guardados</small></div>${hist.length?'<button class="small-link" id="clrH" style="margin-left:auto">Borrar todo</button>':''}</div>`+(hist.length?`<div class="list">${hist.map((h,i)=>`<div class="histitem"><b>${esc(h.name)}</b> <span class="when">· ${esc(h.when)}</span><pre>${esc(h.text)}</pre><button class="btn sec mini" data-copy="${i}">Copiar</button></div>`).join('')}</div>`:`<div class="list"><div class="empty">Use el botón “Guardar” en cualquier cálculo para conservar el resultado aquí.</div></div>`);
+ const ch=$('#clrH');if(ch)ch.onclick=()=>{hist=[];store.set('hist',hist);renderHist()};$('#main').querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>copyText(hist[+b.dataset.copy].text))}
+
+let cur=null,lastRes=null,vals={};
+function renderCalc(c){cur=c;showHeader(false);recent=[c.id,...recent.filter(x=>x!==c.id)].slice(0,8);store.set('recent',recent);const cat=catOf(c.cat);
+ let h=`<button class="back" id="back">‹ ${cat.name}</button><div class="ctitle"><h1>${esc(c.name)}</h1><button class="star ${favs.has(c.id)?'on':''}" id="star" aria-label="Favorito">${favs.has(c.id)?'★':'☆'}</button></div><p class="cdesc">${esc(c.desc)}</p>`;
+ if(c.table){setBar(null);h+=c.html();$('#main').innerHTML=h;bindTop();window.scrollTo(0,0);return}
+ const saved=store.get('v_'+c.id,{});vals={};c.inputs.forEach(i=>vals[i.id]=saved[i.id]!==undefined?saved[i.id]:(i.d!==undefined?i.d:''));
+ h+=`<div class="card" id="form"></div><div id="out"></div><div class="actions"><button class="btn sec" id="reset">↺ Valores de ejemplo</button><button class="btn sec" id="copy">⧉ Copiar</button><button class="btn" id="save">Guardar</button></div>`;
+ $('#main').innerHTML=h;bindTop();drawForm();compute();window.scrollTo(0,0);
+ $('#reset').onclick=()=>{store.set('v_'+c.id,{});c.inputs.forEach(i=>vals[i.id]=i.d!==undefined?i.d:'');drawForm();compute()};
+ $('#copy').onclick=()=>{const t=reportText();if(t)copyText(t)};
+ $('#save').onclick=()=>{const t=reportText();if(!t)return;hist.unshift({name:c.name,when:new Date().toLocaleString('es-NI',{dateStyle:'short',timeStyle:'short'}),text:t});hist=hist.slice(0,40);store.set('hist',hist);toast('Guardado en el historial')}}
+function bindTop(){$('#back').onclick=()=>goBack('sec-'+cur.cat);
+ $('#star').onclick=e=>{favs.has(cur.id)?favs.delete(cur.id):favs.add(cur.id);store.set('favs',[...favs]);e.target.classList.toggle('on');e.target.textContent=favs.has(cur.id)?'★':'☆';toast(favs.has(cur.id)?'Agregado a favoritos':'Quitado de favoritos')}}
+function parsedVals(){const v={};cur.inputs.forEach(i=>{v[i.id]=(i.t==='sel'||i.t==='text'||i.t==='area')?vals[i.id]:num(vals[i.id])});return v}
+const isSeg=i=>i.t==='sel'&&i.o.length<=5&&i.o.reduce((s,o)=>s+o[1].length,0)<=(i.o.length<=2?34:i.o.length===3?30:24);
+function drawForm(){const c=cur,v=parsedVals();$('#form').innerHTML=c.inputs.filter(i=>!i.show||i.show(v)).map(i=>{let ctl;
+  if(isSeg(i))return `<div class="field"><label>${esc(i.l)}</label><div class="seg" data-seg="${i.id}">${i.o.map(([k,l])=>`<button type="button" data-val="${esc(k)}" class="${String(vals[i.id])===String(k)?'on':''}">${esc(l)}</button>`).join('')}</div>${i.h?`<div class="hint">${esc(i.h)}</div>`:''}</div>`;
+  if(i.t==='area')ctl=`<textarea data-id="${i.id}" rows="6" autocapitalize="off" spellcheck="false">${esc(vals[i.id])}</textarea>`;
+  else if(i.t==='sel')ctl=`<select data-id="${i.id}">${i.o.map(([k,l])=>`<option value="${esc(k)}" ${String(vals[i.id])===String(k)?'selected':''}>${esc(l)}</option>`).join('')}</select>`;
+  else ctl=`<input data-id="${i.id}" type="text" ${i.t==='text'?'autocapitalize="off" spellcheck="false"':'inputmode="decimal" enterkeyhint="next"'} value="${esc(vals[i.id])}" placeholder="${i.opt?'opcional':''}"><button type="button" class="clr" data-clr="${i.id}" aria-label="Borrar">×</button>`;
+  return `<div class="field"><label>${esc(i.l)}</label><div class="inwrap">${ctl}${i.u?`<span class="unit">${esc(i.u)}</span>`:''}</div>${i.h?`<div class="hint">${esc(i.h)}</div>`:''}</div>`}).join('');
+ $('#form').querySelectorAll('[data-id]').forEach(el=>{el.addEventListener(el.tagName==='SELECT'?'change':'input',()=>{vals[el.dataset.id]=el.value;store.set('v_'+c.id,vals);if(el.tagName==='SELECT')drawForm();compute()});
+  if(el.tagName==='INPUT')el.addEventListener('focus',()=>setTimeout(()=>el.select(),0))});
+ $('#form').querySelectorAll('[data-seg] button').forEach(b=>b.onclick=()=>{const id=b.parentNode.dataset.seg;vals[id]=b.dataset.val;store.set('v_'+c.id,vals);drawForm();compute()});
+ $('#form').querySelectorAll('[data-clr]').forEach(b=>b.onclick=()=>{const id=b.dataset.clr;vals[id]='';store.set('v_'+c.id,vals);const inp=$('#form').querySelector(`input[data-id="${id}"]`);inp.value='';inp.focus();compute()})}
+function compute(){const c=cur,v=parsedVals();const vis=c.inputs.filter(i=>!i.show||i.show(v));
+ const miss=vis.filter(i=>!i.opt&&i.t!=='sel'&&i.t!=='text'&&i.t!=='area'&&!isFinite(v[i.id]));let r;
+ if(miss.length)r={error:'Complete: '+miss.map(i=>i.l.toLowerCase()).join(', ')+'.'};else{try{r=c.calc(v)}catch(e){r={error:'Revise los datos ingresados.'}}}
+ lastRes=r;if(r.error){$('#out').innerHTML=`<div class="res err"><div class="rrow"><span class="k">${esc(r.error)}</span></div></div>`;setBar({k:'Faltan datos',v:'',err:1});return}
+ $('#out').innerHTML=`<div class="sec-title" style="margin-top:16px">Resultado</div>`+(r.html?`<div class="card" style="margin-bottom:10px">${r.html}</div>`:'')+`<div class="res">${r.rows.map(([k,val,cls])=>{cls=cls||'';const m=cls.includes('main');const st=cls.replace('main','').trim();
+  return `<div class="rrow ${m?'main':''}"><span class="k">${esc(k)}</span><span class="v ${st}">${esc(val)}</span></div>`}).join('')}</div>`+(r.note?`<div class="note">ℹ️ ${esc(r.note)}</div>`:'');
+ const mr=r.rows.find(x=>(x[2]||'').includes('main'))||r.rows[0];setBar({k:mr[0],v:String(mr[1]),cls:(mr[2]||'').replace('main','').trim()})}
+/* barra de resultado fija */
+let barObs=null;
+function setBar(o){const b=$('#rbar');if(!o){b.classList.remove('show');return}b.innerHTML=o.err?`<span class="bk">Complete los datos para ver el resultado</span>`:`<span class="bk">${esc(o.k)}</span><span class="bv ${o.cls||''}">${esc(o.v)}</span><span class="bgo">Ver ↓</span>`;
+ b.classList.add('show');b.onclick=()=>{const out=$('#out');if(out)out.scrollIntoView({behavior:'smooth',block:'start'})};
+ if(barObs)barObs.disconnect();const out=$('#out');if(out&&'IntersectionObserver' in window){barObs=new IntersectionObserver(es=>{b.classList.toggle('hide',es[0].isIntersecting)},{rootMargin:'0px 0px -120px 0px'});barObs.observe(out)}}
+function reportText(){if(!lastRes||lastRes.error){toast('No hay resultado para copiar');return null}const c=cur,v=parsedVals();
+ const ins=c.inputs.filter(i=>!i.show||i.show(v)).filter(i=>String(vals[i.id]).trim()!=='').map(i=>{let val=vals[i.id];if(i.t==='sel')val=(i.o.find(o=>String(o[0])===String(val))||[0,val])[1];if(i.t==='area')val='\n'+val;return `${i.l}: ${val}${i.u?' '+i.u:''}`});
+ return `EEING — Herramientas Eléctricas\n${c.name}\n\nDatos:\n${ins.join('\n')}\n\nResultados:\n${lastRes.rows.map(([k,val])=>`${k}: ${val}`).join('\n')}`}
+function copyText(t){try{navigator.clipboard.writeText(t).then(()=>toast('Copiado: péguelo en WhatsApp o en su informe'),()=>fallbackCopy(t))}catch(e){fallbackCopy(t)}}
+function fallbackCopy(t){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy');toast('Copiado')}catch(e){toast('No se pudo copiar')}a.remove()}
+
+function route(){const id=location.hash.slice(1);let view='';cur=null;
+ if(id==='favoritos'){view='favoritos';renderFavs()}else if(id==='historial'){view='historial';renderHist()}
+ else if(id.startsWith('sec-')&&catOf(id.slice(4))){view='sec';renderSection(catOf(id.slice(4)))}
+ else{const c=ALL.find(x=>x.id===id);if(c){view='calc';renderCalc(c)}else{renderHome()}}
+ renderNav(view);if(view!=='calc')window.scrollTo(0,0)}
+window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(stack.length>1&&stack[stack.length-2]===h)stack.pop();else stack.push(h);route()});
+$('#q').addEventListener('input',()=>{if(location.hash){history.replaceState(null,'',location.pathname+location.search);stack.length=0;stack.push('')}renderHome();renderNav('')});
+route();
+if('serviceWorker' in navigator&&location.protocol.startsWith('http')){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
+let deferredPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;const b=document.getElementById('installBtn');if(b)b.style.display='flex'});
+</script>
+</body>
+</html>
