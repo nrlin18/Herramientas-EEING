@@ -159,6 +159,11 @@ main{padding-bottom:calc(150px + env(safe-area-inset-bottom))}
 .rbar .bgo{font-size:12px;color:#b9c6d8;flex:none}
 nav.tabs button{font-size:12px;padding:9px 2px 10px}
 nav.tabs button .ti{font-size:20px}
+.dgs{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:12px}
+@media(min-width:600px){.dgs{grid-template-columns:1fr 1fr}}
+figure.dg{margin:0;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 8px 8px}
+figure.dg svg{width:100%;height:auto;display:block;font-family:"IBM Plex Sans",sans-serif}
+figure.dg figcaption{font-size:13px;font-weight:600;text-align:center;margin-top:4px;line-height:1.35}
 </style>
 </head>
 <body>
@@ -670,6 +675,121 @@ add({id:'conv-kva',cat:'conversiones',ab:'kVA',name:'kVA ↔ kW',desc:'Convierte
  inputs:[{id:'m',l:'Convertir',t:'sel',o:[['a','kVA → kW'],['b','kW → kVA']],d:'a'},{id:'x',l:'Valor',d:'100'},{id:'fp',l:'Factor de potencia',d:'0.8'}],
  calc(v){const kva=v.m==='a'?v.x:v.x/v.fp,kw=kva*v.fp;return {rows:[['kVA',fmt(kva),v.m==='b'?'main':''],['kW',fmt(kw),v.m==='a'?'main':''],['kVAR',fmt(Math.sqrt(kva*kva-kw*kw))]]}}});
 
+/* ============ Diagramas de conexión (SVG) ============ */
+const LC={L1:'#c62828',L2:'#1565c0',L3:'#2e7d32'};
+const JMP='#f5a300';
+function coil(x1,y1,x2,y2,w){const dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy),nx=-dy/L*w,ny=dx/L*w;
+ return `<polygon points="${x1+nx},${y1+ny} ${x2+nx},${y2+ny} ${x2-nx},${y2-ny} ${x1-nx},${y1-ny}" fill="var(--card)" stroke="currentColor" stroke-width="2"/>`}
+function wire(x1,y1,x2,y2,c,w){return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c||'currentColor'}" stroke-width="${w||2}" stroke-linecap="round"/>`}
+function term(x,y,lbl,line,lx,ly){const f=line?LC[line]:'var(--card)';
+ return `<circle cx="${x}" cy="${y}" r="6.5" fill="${f}" stroke="currentColor" stroke-width="1.6"/><text x="${x+lx}" y="${y+ly}" font-size="12.5" font-weight="600" fill="currentColor" text-anchor="middle" dominant-baseline="middle">${lbl}</text>`+
+  (line?`<text x="${x+lx}" y="${y+ly+13}" font-size="10.5" font-weight="700" fill="${LC[line]}" text-anchor="middle" dominant-baseline="middle">${line}</text>`:'')}
+function legend(y){return `<g font-size="11" fill="currentColor">${['L1','L2','L3'].map((l,i)=>`<circle cx="${18+i*58}" cy="${y}" r="6" fill="${LC[l]}"/><text x="${28+i*58}" y="${y+1}" dominant-baseline="middle">${l}</text>`).join('')}<line x1="196" y1="${y}" x2="222" y2="${y}" stroke="${JMP}" stroke-width="5" stroke-linecap="round"/><text x="228" y="${y+1}" dominant-baseline="middle">Puente</text></g>`}
+function svgWrap(inner,h,title){return `<figure class="dg"><svg viewBox="0 0 320 ${h}" style="color:var(--ink)" role="img" aria-label="${esc(title)}">${inner}</svg><figcaption>${title}</figcaption></figure>`}
+
+/* Motor NEMA 9 terminales en estrella */
+function dgY9(mode){const cx=160,cy=150,ang=[-90,30,150].map(a=>a*Math.PI/180);const P=(k,r)=>[cx+r*Math.cos(ang[k]),cy+r*Math.sin(ang[k])];let s='',pos={};
+ const lab=(k,r,o)=>{const a=ang[k]+Math.PI/2;return [Math.cos(a)*o,Math.sin(a)*o]};
+ for(let k=0;k<3;k++){const [a1,b1]=P(k,0),[a2,b2]=P(k,8),[a3,b3]=P(k,40),[a4,b4]=P(k,46),[a5,b5]=P(k,82),[a6,b6]=P(k,88),[a7,b7]=P(k,124),[a8,b8]=P(k,130);
+  s+=wire(a1,b1,a2,b2)+coil(a2,b2,a3,b3,7)+wire(a3,b3,a4,b4)+wire(a5,b5,a6,b6)+coil(a6,b6,a7,b7,7)+wire(a7,b7,a8,b8);
+  pos['T'+(7+k)]=[a4,b4,lab(k,46,-20)];pos['T'+(4+k)]=[a5,b5,lab(k,82,20)];pos['T'+(1+k)]=[a8,b8,[0,0]]}
+ s+=`<circle cx="${cx}" cy="${cy}" r="3.5" fill="currentColor"/>`;
+ const L=mode==='alta'?{T1:'L1',T2:'L2',T3:'L3'}:{T1:'L1',T7:'L1',T2:'L2',T8:'L2',T3:'L3',T9:'L3'};
+ const J=mode==='alta'?[['T4','T7'],['T5','T8'],['T6','T9']]:[['T4','T5'],['T5','T6'],['T6','T4']];
+ J.forEach(([a,b])=>{s+=wire(pos[a][0],pos[a][1],pos[b][0],pos[b][1],JMP,5)});
+ const off={T1:[20,0],T2:[0,18],T3:[0,18]};
+ Object.entries(pos).forEach(([t,[x,y,o]])=>{const lo=off[t]||o;s+=term(x,y,t,L[t],lo[0],lo[1])});
+ s+=legend(300);return svgWrap(s,312,mode==='alta'?'Estrella serie — tensión ALTA (460 V)':'Estrella paralelo — tensión BAJA (230 V)')}
+
+/* Motor NEMA 9 terminales en triángulo */
+function dgD9(mode){const C=[[160,26],[290,236],[30,236]];let s='',pos={};
+ const lerp=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];
+ for(let k=0;k<3;k++){const A=C[k],B=C[(k+1)%3];const p=t=>lerp(A,B,t);
+  s+=wire(...A,...p(0.07))+coil(...p(0.07),...p(0.34),8)+wire(...p(0.34),...p(0.39))+wire(...p(0.61),...p(0.66))+coil(...p(0.66),...p(0.93),8)+wire(...p(0.93),...B);
+  const dx=B[0]-A[0],dy=B[1]-A[1],L=Math.hypot(dx,dy),n=[dy/L*-18,dx/L*18];const out=k===2?[-n[0],-n[1]]:k===1?[-n[0],-n[1]]:[-n[0],-n[1]];
+  pos['T'+(4+k)]=[...p(0.39),out];pos['T'+[7,8,9][k]]=[...p(0.61),out];pos['T'+(1+k)]=[...A,[[0,-16],[16,10],[-16,10]][k]]}
+ const L=mode==='alta'?{T1:'L1',T2:'L2',T3:'L3'}:{T1:'L1',T6:'L1',T7:'L1',T2:'L2',T4:'L2',T8:'L2',T3:'L3',T5:'L3',T9:'L3'};
+ if(mode==='alta')[['T4','T7'],['T5','T8'],['T6','T9']].forEach(([a,b])=>{s+=wire(pos[a][0],pos[a][1],pos[b][0],pos[b][1],JMP,5)});
+ Object.entries(pos).forEach(([t,[x,y,o]])=>{s+=term(x,y,t,L[t],o[0],o[1])});
+ s+=legend(300);return svgWrap(s,312,mode==='alta'?'Triángulo serie — tensión ALTA (460 V)':'Triángulo paralelo — tensión BAJA (230 V)')}
+
+/* Bornera IEC de 6 terminales */
+function dgBornera(mode){let s=`<rect x="40" y="26" width="240" height="132" rx="12" fill="var(--chip)" stroke="currentColor" stroke-width="1.5"/>`;
+ const X=[90,160,230],top=['W2','U2','V2'],bot=['U1','V1','W1'],yT=62,yB=122;
+ if(mode==='Y')s+=`<rect x="${X[0]-12}" y="${yT-9}" width="${X[2]-X[0]+24}" height="18" rx="9" fill="${JMP}"/>`;
+ else X.forEach(x=>{s+=`<rect x="${x-9}" y="${yT-12}" width="18" height="${yB-yT+24}" rx="9" fill="${JMP}"/>`});
+ X.forEach((x,i)=>{s+=`<circle cx="${x}" cy="${yT}" r="9" fill="var(--card)" stroke="currentColor" stroke-width="2"/><text x="${x}" y="${yT-22}" font-size="13" font-weight="600" text-anchor="middle" fill="currentColor">${top[i]}</text>`;
+  s+=`<circle cx="${x}" cy="${yB}" r="9" fill="var(--card)" stroke="currentColor" stroke-width="2"/><text x="${x+22}" y="${yB+5}" font-size="13" font-weight="600" text-anchor="middle" fill="currentColor">${bot[i]}</text>`;
+  const l=['L1','L2','L3'][i];s+=wire(x,yB+9,x,196,LC[l],3)+`<text x="${x}" y="210" font-size="12" font-weight="700" text-anchor="middle" fill="${LC[l]}">${l}</text>`});
+ return svgWrap(s,218,mode==='Y'?'Estrella (Y): W2-U2-V2 unidos — tensión ALTA (ej. 380 V en motor 220/380)':'Triángulo (Δ): W2-U1, U2-V1, V2-W1 — tensión BAJA (ej. 220 V en motor 220/380)')}
+
+/* Motor monofásico doble tensión */
+function dgMono(mode){let s='';const cap=(x,y)=>`<line x1="${x-10}" y1="${y-3}" x2="${x+10}" y2="${y-3}" stroke="currentColor" stroke-width="2.5"/><line x1="${x-10}" y1="${y+3}" x2="${x+10}" y2="${y+3}" stroke="currentColor" stroke-width="2.5"/>`;
+ const sw=(x,y)=>`<circle cx="${x}" cy="${y-8}" r="2.5" fill="currentColor"/><line x1="${x}" y1="${y-8}" x2="${x+9}" y2="${y+7}" stroke="currentColor" stroke-width="2"/><circle cx="${x}" cy="${y+8}" r="2.5" fill="currentColor"/>`;
+ const startBranch=(x,y1,y2)=>wire(x,y1,x,y1+12)+coil(x,y1+12,x,y1+52,8)+wire(x,y1+52,x,y1+66)+`<text x="${x+14}" y="${y1+34}" font-size="10" fill="currentColor">arranque</text>`+cap(x,y1+72)+wire(x,y1+75,x,y1+86)+wire(x,y1+66,x,y1+69)+sw(x,y1+96)+wire(x,y1+104,x,y2);
+ if(mode==='baja'){s+=wire(30,30,290,30,LC.L1,3)+wire(30,210,290,210,LC.L2,3)+`<text x="14" y="34" font-size="12" font-weight="700" fill="${LC.L1}">L1</text><text x="14" y="214" font-size="12" font-weight="700" fill="${LC.L2}">L2</text>`;
+  [[80,'T1','T2'],[160,'T3','T4']].forEach(([x,a,b])=>{s+=wire(x,30,x,70)+coil(x,70,x,170,9)+wire(x,170,x,210)+`<text x="${x+14}" y="62" font-size="12" font-weight="600" fill="currentColor">${a}</text><text x="${x+14}" y="190" font-size="12" font-weight="600" fill="currentColor">${b}</text>`});
+  s+=startBranch(240,30,210)+`<text x="254" y="52" font-size="12" font-weight="600" fill="currentColor">T8</text><text x="254" y="200" font-size="12" font-weight="600" fill="currentColor">T5</text>`;
+  [80,160,240].forEach(x=>{s+=`<circle cx="${x}" cy="30" r="3.5" fill="${LC.L1}"/><circle cx="${x}" cy="210" r="3.5" fill="${LC.L2}"/>`})}
+ else{s+=wire(30,24,110,24,LC.L1,3)+`<text x="14" y="28" font-size="12" font-weight="700" fill="${LC.L1}">L1</text>`+wire(30,226,290,226,LC.L2,3)+`<text x="14" y="230" font-size="12" font-weight="700" fill="${LC.L2}">L2</text>`;
+  s+=wire(110,24,110,36)+coil(110,36,110,100,9)+wire(110,100,110,125)+coil(110,140,110,204,9)+wire(110,125,110,140)+wire(110,204,110,226);
+  s+=`<text x="124" y="40" font-size="12" font-weight="600" fill="currentColor">T1</text><text x="124" y="104" font-size="12" font-weight="600" fill="currentColor">T2</text><text x="124" y="146" font-size="12" font-weight="600" fill="currentColor">T3</text><text x="124" y="212" font-size="12" font-weight="600" fill="currentColor">T4</text>`;
+  s+=wire(110,125,240,125,JMP,4)+`<circle cx="110" cy="125" r="5" fill="${JMP}"/><text x="168" y="118" font-size="11" fill="currentColor">T2-T3-T8 unidos</text>`;
+  s+=startBranch(240,125,226).replace('arranque','arr.')+`<text x="254" y="148" font-size="12" font-weight="600" fill="currentColor">T8</text><text x="254" y="222" font-size="12" font-weight="600" fill="currentColor">T5</text>`;
+  s+=`<circle cx="110" cy="226" r="3.5" fill="${LC.L2}"/><circle cx="240" cy="226" r="3.5" fill="${LC.L2}"/>`}
+ return svgWrap(s,mode==='baja'?224:240,mode==='baja'?'Tensión BAJA (115 V): devanados principales en paralelo':'Tensión ALTA (230 V): devanados principales en serie')}
+
+/* Arranque estrella-triángulo (circuito de potencia) */
+function dgYD(){let s='';const xs=[50,80,110];const contact=(x,y)=>`<line x1="${x}" y1="${y-9}" x2="${x}" y2="${y-4}" stroke="currentColor" stroke-width="2"/><line x1="${x}" y1="${y+9}" x2="${x}" y2="${y+4}" stroke="currentColor" stroke-width="2"/><line x1="${x-4}" y1="${y-4}" x2="${x+4}" y2="${y-4}" stroke="currentColor" stroke-width="2"/><line x1="${x-4}" y1="${y+4}" x2="${x+4}" y2="${y+4}" stroke="currentColor" stroke-width="2"/>`;
+ ['L1','L2','L3'].forEach((l,i)=>{const x=xs[i];s+=`<text x="${x}" y="14" font-size="11" font-weight="700" text-anchor="middle" fill="${LC[l]}">${l}</text>`+wire(x,20,x,56,LC[l],2.5)+wire(x,70,x,112,LC[l],2.5)+wire(x,130,x,170,LC[l],2.5)+wire(x,190,x,250,LC[l],2.5)+contact(x,121)});
+ s+=`<rect x="38" y="56" width="84" height="14" rx="3" fill="var(--chip)" stroke="currentColor"/><text x="130" y="67" font-size="11" fill="currentColor">Q1 breaker</text>`;
+ s+=`<text x="130" y="125" font-size="11" font-weight="700" fill="currentColor">KM1</text><text x="130" y="138" font-size="10" fill="currentColor">principal</text>`;
+ s+=`<rect x="38" y="170" width="84" height="20" rx="3" fill="var(--chip)" stroke="currentColor"/><text x="130" y="184" font-size="11" fill="currentColor">F1 térmico</text>`;
+ ['U1','V1','W1'].forEach((t,i)=>{s+=`<text x="${xs[i]}" y="266" font-size="11.5" font-weight="600" text-anchor="middle" fill="currentColor">${t}</text>`});
+ const xd=[200,230,260];[['L1','W2'],['L2','U2'],['L3','V2']].forEach(([l,t],i)=>{const x=xd[i];s+=wire(xs[i],95-i*0,x,95,LC[l],2)+wire(x,95,x,112,LC[l],2)+contact(x,121)+wire(x,130,x,250,LC[l],2)+`<text x="${x}" y="266" font-size="11.5" font-weight="600" text-anchor="middle" fill="currentColor">${t}</text><circle cx="${xs[i]}" cy="95" r="3" fill="${LC[l]}"/>`});
+ s+=`<text x="276" y="125" font-size="11" font-weight="700" fill="currentColor">KM3</text><text x="276" y="138" font-size="10" fill="currentColor">Δ</text>`;
+ s+=wire(200,210,260,210,'currentColor',1.5);[200,230,260].forEach(x=>{s+=`<circle cx="${x}" cy="210" r="3" fill="currentColor"/>`});
+ s+=`<g>${[200,230,260].map(x=>contact(x,225)).join('')}</g>`;
+ s+=`<text x="276" y="229" font-size="11" font-weight="700" fill="currentColor">KM2</text><text x="276" y="242" font-size="10" fill="currentColor">Y</text>`;
+ s+=wire(200,234,260,234,JMP,4);
+ s+=`<rect x="30" y="276" width="260" height="26" rx="8" fill="var(--chip)" stroke="currentColor"/><text x="160" y="293" font-size="11.5" font-weight="600" text-anchor="middle" fill="currentColor">MOTOR (bornera sin puentes)</text>`;
+ return svgWrap(s,310,'Arranque estrella-triángulo: KM1 + KM2 (estrella) → KM1 + KM3 (triángulo)')}
+
+/* ---- Transformadores ---- */
+const AN=[-90,30,150].map(a=>a*Math.PI/180);
+function tStar(cx,cy,r,lb,nl,col){let s='';const pts=AN.map(a=>[cx+r*Math.cos(a),cy+r*Math.sin(a)]);
+ pts.forEach(([x,y],i)=>{const p=t=>[cx+(x-cx)*t,cy+(y-cy)*t];s+=wire(cx,cy,...p(0.22))+coil(...p(0.22),...p(0.8),7)+wire(...p(0.8),x,y)+
+  `<circle cx="${x}" cy="${y}" r="5" fill="${col?col[i]:'var(--card)'}" stroke="currentColor" stroke-width="1.5"/><text x="${x+[0,16,-16][i]}" y="${y+[-13,12,12][i]}" font-size="12" font-weight="600" text-anchor="middle" fill="currentColor">${lb[i]}</text>`});
+ if(nl)s+=`<circle cx="${cx}" cy="${cy}" r="5" fill="#8a8a8a" stroke="currentColor" stroke-width="1.5"/><text x="${cx+16}" y="${cy+4}" font-size="11.5" font-weight="600" fill="currentColor">${nl}</text>`;
+ return s}
+function tDelta(cx,cy,r,lb,tap,col,sides){let s='';const P=AN.map(a=>[cx+r*Math.cos(a),cy+r*Math.sin(a)]);sides=sides||[0,1,2];
+ sides.forEach(k=>{const A=P[k],B=P[(k+1)%3];const p=t=>[A[0]+(B[0]-A[0])*t,A[1]+(B[1]-A[1])*t];
+  if(tap&&tap.side===k){s+=wire(...A,...p(0.08))+coil(...p(0.08),...p(0.44),7)+wire(...p(0.44),...p(0.56))+coil(...p(0.56),...p(0.92),7)+wire(...p(0.92),...B);const [mx,my]=p(0.5);
+   s+=`<circle cx="${mx}" cy="${my}" r="5" fill="#8a8a8a" stroke="currentColor" stroke-width="1.5"/><text x="${mx+tap.dx}" y="${my+tap.dy}" font-size="11.5" font-weight="600" text-anchor="middle" fill="currentColor">${tap.l}</text>`}
+  else s+=wire(...A,...p(0.15))+coil(...p(0.15),...p(0.85),7)+wire(...p(0.85),...B)});
+ P.forEach(([x,y],i)=>{s+=`<circle cx="${x}" cy="${y}" r="5" fill="${col?col[i]:'var(--card)'}" stroke="currentColor" stroke-width="1.5"/><text x="${x+[0,16,-16][i]}" y="${y+[-13,12,12][i]}" font-size="12" font-weight="600" text-anchor="middle" fill="currentColor">${lb[i]}</text>`});return s}
+const hdr=(t1,t2)=>`<text x="80" y="16" font-size="11" text-anchor="middle" fill="var(--muted)">${t1}</text><text x="240" y="16" font-size="11" text-anchor="middle" fill="var(--muted)">${t2}</text><line x1="160" y1="28" x2="160" y2="170" stroke="var(--line)" stroke-dasharray="4 4"/>`;
+const vtxt=(y,t)=>`<text x="160" y="${y}" font-size="11.5" font-weight="600" text-anchor="middle" fill="currentColor">${t}</text>`;
+const PH=[LC.L1,LC.L2,LC.L3];
+function dgTr(kind){let s='',h=200,t='';
+ if(kind==='dyn'){s=hdr('Primario Δ (MT)','Secundario Y (BT)')+tDelta(80,104,60,['H1','H2','H3'])+tStar(240,104,60,['X1','X2','X3'],'X0',PH)+vtxt(192,'Ej.: 13,2 kV Δ → 120/208 V Y · 277/480 V Y');t='Dyn1 / Dyn11 — Delta-Estrella con neutro (distribución)'}
+ if(kind==='yyn'){s=hdr('Primario Y (MT)','Secundario Y (BT)')+tStar(80,104,60,['H1','H2','H3'],'H0')+tStar(240,104,60,['X1','X2','X3'],'X0',PH)+vtxt(192,'Ej.: 7,62/13,2 kV YN → 120/208 V YN (banco en poste)');t='YNyn0 — Estrella-Estrella aterrizada (bancos de 3 monofásicos)'}
+ if(kind==='dd'){s=hdr('Primario Δ','Secundario Δ (3 hilos)')+tDelta(80,104,60,['H1','H2','H3'])+tDelta(240,104,60,['X1','X2','X3'],null,PH)+vtxt(192,'Ej.: 13,2 kV Δ → 240 V o 480 V Δ, sin neutro');t='Dd0 — Delta-Delta (cargas trifásicas, 3 hilos)'}
+ if(kind==='yd'){s=hdr('Primario Y','Secundario Δ')+tStar(80,104,60,['H1','H2','H3'],'H0')+tDelta(240,104,60,['X1','X2','X3'],null,PH)+vtxt(192,'Neutro primario sin aterrizar en bancos de monofásicos');t='Yd1 / Yd11 — Estrella-Delta'}
+ if(kind==='hl'){s=`<text x="160" y="16" font-size="11" text-anchor="middle" fill="var(--muted)">Secundario delta con derivación central</text>`+tDelta(160,128,74,['B · fase alta','C','A'],{side:1,l:'N',dx:0,dy:18},['#f07d00',LC.L3,LC.L1])+vtxt(226,'A-N = C-N = 120 V · B-N = 208 V · L-L = 240 V');h=238;t='Delta 4 hilos con fase alta (120/240 V Δ)'}
+ if(kind==='open'){s=`<text x="160" y="16" font-size="11" text-anchor="middle" fill="var(--muted)">Secundario delta abierto (2 transformadores)</text>`+tDelta(160,128,74,['B · fase alta','C','A'],{side:1,l:'N',dx:0,dy:18},['#f07d00',LC.L3,LC.L1],[0,1])+vtxt(226,'Mismas tensiones · 86,6 % de capacidad');h=238;t='Delta abierto — 2 transformadores (120/240 V)'}
+ return svgWrap(s,h,t)}
+function dgMonoTr(mode){let s='';const X=[70,130,190,250],y=70;
+ s+=`<text x="160" y="16" font-size="11" text-anchor="middle" fill="var(--muted)">Bobinas del secundario</text>`+coil(70,y,130,y,9)+coil(190,y,250,y,9);
+ ['X1','X2','X3','X4'].forEach((l,i)=>{s+=`<circle cx="${X[i]}" cy="${y}" r="5" fill="var(--card)" stroke="currentColor" stroke-width="1.5"/><text x="${X[i]}" y="${y-14}" font-size="12" font-weight="600" text-anchor="middle" fill="currentColor">${l}</text>`});
+ if(mode==='serie'){s+=wire(130,y+5,130,y+40,JMP,4)+wire(190,y+5,190,y+40,JMP,4)+wire(130,y+40,190,y+40,JMP,4)+wire(160,y+40,160,y+80,'#8a8a8a',3)+`<text x="160" y="${y+96}" font-size="12" font-weight="700" text-anchor="middle" fill="#8a8a8a">N</text>`;
+  s+=wire(70,y+5,70,y+80,LC.L1,3)+`<text x="70" y="${y+96}" font-size="12" font-weight="700" text-anchor="middle" fill="${LC.L1}">L1</text>`+wire(250,y+5,250,y+80,LC.L2,3)+`<text x="250" y="${y+96}" font-size="12" font-weight="700" text-anchor="middle" fill="${LC.L2}">L2</text>`;
+  s+=vtxt(y+120,'L1-N = L2-N = 120 V · L1-L2 = 240 V')}
+ else{s+=`<path d="M70 ${y+5} V${y+36} H190 V${y+5}" fill="none" stroke="${JMP}" stroke-width="4"/><path d="M130 ${y+5} V${y+52} H250 V${y+5}" fill="none" stroke="${JMP}" stroke-width="4"/>`;
+  s+=wire(100,y+36,100,y+80,LC.L1,3)+`<text x="100" y="${y+96}" font-size="12" font-weight="700" text-anchor="middle" fill="${LC.L1}">L (X1-X3)</text>`+wire(220,y+52,220,y+80,'#8a8a8a',3)+`<text x="220" y="${y+96}" font-size="12" font-weight="700" text-anchor="middle" fill="#8a8a8a">N (X2-X4)</text>`;
+  s+=vtxt(y+120,'Salida 120 V con el doble de corriente')}
+ return svgWrap(s,200,mode==='serie'?'Monofásico serie: X2-X3 unidos = neutro (120/240 V)':'Monofásico paralelo: X1-X3 y X2-X4 (120 V)')}
+
 /* ============ TABLAS (recursos) ============ */
 const TABLES=[];
 const tbl=(o)=>{o.cat=o.cat||'tablas';o.table=1;TABLES.push(o);CALCS.push(o)};
@@ -699,22 +819,22 @@ tbl({id:'tabla-tuberia',ab:'⌀',name:'Tuberías y áreas de conductores',desc:'
 tbl({id:'tabla-transformadores',ab:'TR',name:'Transformadores normalizados',desc:'Capacidades comerciales y corrientes a tensiones comunes.',kw:'transformadores kva corriente tabla',
  html:()=>`<div class="h3">Trifásicos</div>`+T(['kVA','I a 208 V','I a 240 V','I a 480 V','I a 13,2 kV','I a 24,9 kV'],TR3.map(s=>[s,...[208,240,480,13200,24900].map(V=>+(s*1000/(SQ3*V)).toFixed(1))]))
   +`<div class="h3">Monofásicos</div>`+T(['kVA','I a 120 V','I a 240 V','I a 7,62 kV','I a 14,4 kV'],TR1.map(s=>[s,...[120,240,7620,14400].map(V=>+(s*1000/V).toFixed(1))]))});
-tbl({id:'tabla-conexiones-motor',ab:'⚙',name:'Conexiones de motores trifásicos',desc:'Bornera de 6, 9 y 12 terminales en estrella y triángulo, tensión baja y alta.',kw:'conexion bornera estrella triangulo 9 puntas 12 puntas motor trifasico',
- html:()=>`<div class="h3">Motor IEC de 6 terminales (220/380 V o 380/660 V)</div>`+T(['Conexión','Puentes','Alimentación'],[['Estrella (Y) — tensión alta','U2-V2-W2 unidos','L1→U1, L2→V1, L3→W1'],['Triángulo (Δ) — tensión baja','U1-W2, V1-U2, W1-V2','L1→U1, L2→V1, L3→W1']],'wrap')
+tbl({id:'tabla-conexiones-motor',cat:'motores',ab:'⚙',name:'Diagramas de conexión — motores trifásicos',desc:'Bornera de 6, 9 y 12 terminales en estrella y triángulo, tensión baja y alta.',kw:'conexion bornera estrella triangulo 9 puntas 12 puntas motor trifasico',
+ html:()=>`<div class="h3">Bornera IEC de 6 terminales</div><div class="dgs">${dgBornera('Y')}${dgBornera('D')}</div><div class="h3">NEMA 9 terminales — estrella</div><div class="dgs">${dgY9('baja')}${dgY9('alta')}</div><div class="h3">NEMA 9 terminales — triángulo</div><div class="dgs">${dgD9('baja')}${dgD9('alta')}</div><div class="h3">Arranque estrella-triángulo (potencia)</div><div class="dgs">${dgYD()}</div><div class="note">Secuencia: KM1 + KM2 (estrella) durante 5–10 s → abre KM2 → cierra KM3 (triángulo). KM2 y KM3 deben tener enclavamiento eléctrico y mecánico. El relé térmico F1 se ajusta a In/√3 (≈ 58 % de In) si va en las líneas del triángulo.</div><div class="h3">Tablas de conexión</div><div class="h3" style="font-size:14px">Motor IEC de 6 terminales (220/380 V o 380/660 V)</div>`+T(['Conexión','Puentes','Alimentación'],[['Estrella (Y) — tensión alta','U2-V2-W2 unidos','L1→U1, L2→V1, L3→W1'],['Triángulo (Δ) — tensión baja','U1-W2, V1-U2, W1-V2','L1→U1, L2→V1, L3→W1']],'wrap')
   +`<div class="note">Arranque estrella-triángulo: el motor debe estar diseñado para trabajar en Δ a la tensión de la red (ej. motor 380/660 V en red de 380 V, o 220/380 V en red de 220 V).</div>`
   +`<div class="h3">Motor NEMA de 9 terminales — estrella (Y)</div>`+T(['Tensión','Puentes','Alimentación'],[['Baja (230 V) — Y paralelo','T4-T5-T6 unidos','L1→T1-T7, L2→T2-T8, L3→T3-T9'],['Alta (460 V) — Y serie','T4-T7, T5-T8, T6-T9','L1→T1, L2→T2, L3→T3']],'wrap')
   +`<div class="h3">Motor NEMA de 9 terminales — triángulo (Δ)</div>`+T(['Tensión','Puentes','Alimentación'],[['Baja (230 V) — Δ paralelo','—','L1→T1-T6-T7, L2→T2-T4-T8, L3→T3-T5-T9'],['Alta (460 V) — Δ serie','T4-T7, T5-T8, T6-T9','L1→T1, L2→T2, L3→T3']],'wrap')
   +`<div class="note">Para distinguir un motor de 9 puntas en Y de uno en Δ: en Y hay continuidad entre T7, T8 y T9 (3 grupos de 2 bobinas + estrella interna); en Δ hay continuidad T1-T4-T9, T2-T5-T7, T3-T6-T8.</div>`
   +`<div class="h3">Motor NEMA de 12 terminales</div>`+T(['Conexión','Puentes','Alimentación'],[['Y paralelo (baja)','T4-T5-T6 y T10-T11-T12','L1→T1-T7, L2→T2-T8, L3→T3-T9'],['Y serie (alta)','T4-T7, T5-T8, T6-T9, T10-T11-T12','L1→T1, L2→T2, L3→T3'],['Δ paralelo (baja)','—','L1→T1-T6-T7-T12, L2→T2-T4-T8-T10, L3→T3-T5-T9-T11'],['Δ serie (alta)','T4-T7, T5-T8, T6-T9','L1→T1-T12, L2→T2-T10, L3→T3-T11']],'wrap')
   +`<div class="note">Para invertir el giro intercambie dos fases de alimentación cualesquiera. Confirme siempre con el diagrama de la placa del motor.</div><div class="h3">Clases de aislamiento</div>`+T(['Clase','Temperatura máx.'],[['A','105 °C'],['E','120 °C'],['B','130 °C'],['F','155 °C'],['H','180 °C']])});
-tbl({id:'tabla-motor-monofasico',ab:'1φ',name:'Motores monofásicos: tipos y conexiones',desc:'Tipos de motor monofásico, bornera de doble tensión 115/230 V e inversión de giro.',kw:'motor monofasico capacitor arranque marcha psc fase partida conexion 115 230 inversion giro',
+tbl({id:'tabla-motor-monofasico',cat:'motores',ab:'1φ',name:'Diagramas de conexión — motores monofásicos',desc:'Tipos de motor monofásico, bornera de doble tensión 115/230 V e inversión de giro.',kw:'motor monofasico capacitor arranque marcha psc fase partida conexion 115 230 inversion giro',
  html:()=>`<div class="h3">Tipos de motor monofásico</div>`+T(['Tipo','Característica','Uso típico'],[['Fase partida','Devanado auxiliar + interruptor centrífugo; par de arranque bajo','Ventiladores, esmeriles, cargas livianas'],['Arranque por capacitor (CS)','Capacitor electrolítico solo en el arranque; par alto','Bombas, compresores, bandas'],['Capacitor permanente (PSC)','Capacitor de marcha siempre conectado; sin centrífugo','Ventiladores, sopladores, A/C (condensador)'],['Capacitor de arranque y marcha (CSCR)','Dos capacitores; par alto y buena eficiencia','Compresores, bombas de pozo'],['Polo sombreado','Sin capacitor; muy baja potencia y eficiencia','Extractores pequeños, motores de < 1/4 HP'],['Universal','Escobillas, funciona en CA o CC; alta velocidad','Herramientas eléctricas, licuadoras']],'wrap')
-  +`<div class="h3">Bornera NEMA doble tensión (T1–T4 principal, T5–T8 arranque)</div>`+T(['Tensión','L1','L2','Unir'],[['Baja (115 V)','T1, T3, T8','T2, T4, T5','—'],['Alta (230 V)','T1','T4, T5','T2, T3, T8']],'wrap')
+  +`<div class="h3">Diagrama — motor de doble tensión con capacitor de arranque</div><div class="dgs">${dgMono('baja')}${dgMono('alta')}</div><div class="h3">Bornera NEMA doble tensión (T1–T4 principal, T5–T8 arranque)</div>`+T(['Tensión','L1','L2','Unir'],[['Baja (115 V)','T1, T3, T8','T2, T4, T5','—'],['Alta (230 V)','T1','T4, T5','T2, T3, T8']],'wrap')
   +`<div class="note">Inversión de giro: intercambie T5 y T8 (extremos del devanado de arranque). Los devanados principales (T1-T2 y T3-T4) quedan en paralelo a 115 V y en serie a 230 V.</div>`
   +`<div class="h3">Bornera IEC monofásica</div>`+T(['Terminal','Función'],[['U1 – U2','Devanado principal (marcha)'],['Z1 – Z2','Devanado auxiliar (arranque) con capacitor'],['Inversión','Intercambiar Z1 y Z2']],'wrap')
   +`<div class="h3">Diagnóstico rápido con óhmetro</div>`+T(['Medición','Resultado típico'],[['Común – Marcha (C-R)','Resistencia menor'],['Común – Arranque (C-S)','Resistencia mayor'],['Marcha – Arranque (R-S)','Suma de las dos anteriores']],'wrap')});
-tbl({id:'tabla-conexiones-trafo',ab:'TΔ',name:'Conexiones de transformadores',desc:'Grupos vectoriales (Dyn11, Dyn1, Yyn0…), bancos de monofásicos, delta abierto y secundarios monofásicos.',kw:'transformador conexion grupo vectorial dyn11 dyn1 yyn0 delta estrella abierto banco monofasico x1 x2 x3 x4 polaridad',
- html:()=>`<div class="h3">Grupos vectoriales trifásicos</div>`+T(['Grupo','Primario / Secundario','Desfase','Uso'],[['Dyn11','Δ / Y con neutro','+30° (secundario adelanta)','Distribución (norma IEC)'],['Dyn1','Δ / Y con neutro','−30° (secundario atrasa)','Distribución (norma ANSI / IEEE C57.12)'],['Dyn5','Δ / Y con neutro','150°','Distribución, algunos fabricantes'],['Yyn0','Y / Y con neutro','0°','Distribución; requiere núcleo de 3 columnas o terciario'],['YNyn0','Y aterrizada / Y aterrizada','0°','Redes multiaterrizadas (bancos en poste)'],['Yd1 / Yd11','Y / Δ','−30° / +30°','Elevadores de generación'],['Dd0','Δ / Δ','0°','Industria con cargas trifásicas, 3 hilos'],['Yzn11','Y / Zig-zag con neutro','+30°','Cargas desbalanceadas, puesta a tierra'],['Dzn0','Δ / Zig-zag con neutro','0°','Cargas desbalanceadas']],'wrap')
+tbl({id:'tabla-conexiones-trafo',ab:'TΔ',name:'Diagramas de conexión — transformadores',desc:'Grupos vectoriales (Dyn11, Dyn1, Yyn0…), bancos de monofásicos, delta abierto y secundarios monofásicos.',kw:'transformador conexion grupo vectorial dyn11 dyn1 yyn0 delta estrella abierto banco monofasico x1 x2 x3 x4 polaridad',
+ html:()=>`<div class="h3">Transformadores trifásicos y bancos</div><div class="dgs">${dgTr('dyn')}${dgTr('yyn')}${dgTr('dd')}${dgTr('yd')}</div><div class="h3">Delta con fase alta (4 hilos)</div><div class="dgs">${dgTr('hl')}${dgTr('open')}</div><div class="note">NEC 110.15: la fase alta debe identificarse con color naranja y conectarse en la posición B (centro) del tablero. Nunca alimente cargas de 120 V desde la fase alta.</div><div class="h3">Transformador monofásico (secundario X1–X4)</div><div class="dgs">${dgMonoTr('serie')}${dgMonoTr('paralelo')}</div><div class="h3">Grupos vectoriales trifásicos</div>`+T(['Grupo','Primario / Secundario','Desfase','Uso'],[['Dyn11','Δ / Y con neutro','+30° (secundario adelanta)','Distribución (norma IEC)'],['Dyn1','Δ / Y con neutro','−30° (secundario atrasa)','Distribución (norma ANSI / IEEE C57.12)'],['Dyn5','Δ / Y con neutro','150°','Distribución, algunos fabricantes'],['Yyn0','Y / Y con neutro','0°','Distribución; requiere núcleo de 3 columnas o terciario'],['YNyn0','Y aterrizada / Y aterrizada','0°','Redes multiaterrizadas (bancos en poste)'],['Yd1 / Yd11','Y / Δ','−30° / +30°','Elevadores de generación'],['Dd0','Δ / Δ','0°','Industria con cargas trifásicas, 3 hilos'],['Yzn11','Y / Zig-zag con neutro','+30°','Cargas desbalanceadas, puesta a tierra'],['Dzn0','Δ / Zig-zag con neutro','0°','Cargas desbalanceadas']],'wrap')
   +`<div class="h3">Bancos de transformadores monofásicos</div>`+T(['Conexión','Secundario típico','Notas'],[['Y aterrizada – Y aterrizada (3 unid.)','120/208 V o 277/480 V, 4 hilos','La más común en redes de distribución en poste'],['Y – Δ (3 unid.)','240 V 3 hilos o 120/240 V 4 hilos','Neutro primario sin aterrizar (flotante)'],['Δ – Δ con derivación central (3 unid.)','120/240 V 4 hilos con fase alta','Una unidad más grande alimenta las cargas de 120 V'],['Delta abierto / estrella abierta (2 unid.)','120/240 V 4 hilos con fase alta','Capacidad = 86,6 % de las 2 unidades (57,7 % del banco de 3)'],['Y – Y (3 unid.) sin neutro','3 hilos','Evitar: tensiones de neutro inestables']],'wrap')
   +`<div class="h3">Secundario de transformador monofásico</div>`+T(['Conexión','Bornes','Resultado'],[['Serie (fase partida)','Unir X2-X3 = neutro; fases en X1 y X4','120/240 V, 3 hilos'],['Paralelo','Unir X1-X3 y X2-X4','120 V, 2 hilos (doble corriente)'],['Con derivación central','X1 – X2 (neutro) – X3','120/240 V, 3 hilos']],'wrap')
   +`<div class="note">Polaridad: aditiva (X1 diagonal a H1, típica ≤ 200 kVA y ≤ 8 660 V) o sustractiva (X1 adyacente a H1). Para conectar transformadores en paralelo deben coincidir relación de transformación, grupo vectorial / polaridad y secuencia de fases; la impedancia (Z %) debe ser similar (±7,5 %).</div>`
