@@ -164,6 +164,8 @@ nav.tabs button .ti{font-size:20px}
 figure.dg{margin:0;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 8px 8px}
 figure.dg svg{width:100%;height:auto;display:block;font-family:"IBM Plex Sans",sans-serif}
 figure.dg figcaption{font-size:13px;font-weight:600;text-align:center;margin-top:4px;line-height:1.35}
+ol.steps{margin:0;padding-left:22px;line-height:1.5;font-size:14.5px}
+ol.steps li{margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -252,6 +254,7 @@ const CATS=[
  {id:'motores',name:'Motores',em:'⚙️',color:'#7a3fc7'},
  {id:'cctv',name:'Cámaras y CCTV',em:'📹',color:'#0e7490'},
  {id:'redes',name:'Voz y Datos',em:'🌐',color:'#2563eb'},
+ {id:'ponchado',name:'Ponchado y conectores',em:'🔧',color:'#0d9488'},
  {id:'incendio',name:'Contra incendios',em:'🔥',color:'#dc2626'},
  {id:'electronica',name:'Electrónica',em:'🔌',color:'#0f8a6a'},
  {id:'conversiones',name:'Conversiones',em:'🔁',color:'#c46a00'},
@@ -998,6 +1001,100 @@ tbl({id:'tabla-incendio',cat:'incendio',ab:'☰',name:'Tablas contra incendios',
   +`<div class="h3">Clasificación de riesgos (NFPA 13)</div>`+T(['Riesgo','Densidad / área','Ejemplos'],[['Ligero','4,1 mm/min / 139 m²','Oficinas, escuelas, iglesias, hospitales, comedores'],['Ordinario 1','6,1 mm/min / 139 m²','Estacionamientos, panaderías, lavanderías, procesamiento de alimentos'],['Ordinario 2','8,1 mm/min / 139 m²','Bodegas de mercadería general, talleres, textiles, comercio'],['Extra 1','12,2 mm/min / 232 m²','Imprentas, aserraderos, tapicería con espumas'],['Extra 2','16,3 mm/min / 232 m²','Líquidos inflamables, pintura por aspersión']],'wrap')
   +`<div class="h3">Tipos de detectores</div>`+T(['Detector','Aplicación'],[['Humo fotoeléctrico','Uso general; fuegos lentos con humo visible'],['Humo iónico','Fuegos rápidos con partículas pequeñas (en desuso)'],['Temperatura fija (57 °C / 88 °C)','Cocinas, cuartos de máquinas, ambientes con polvo'],['Termovelocimétrico','Aumento rápido de temperatura (≈ 8 °C/min)'],['Haz lineal (beam)','Naves y bodegas de techo alto'],['Aspiración (VESDA)','Centros de datos, salas limpias, techos altos'],['Llama (UV/IR)','Combustibles líquidos, áreas abiertas'],['Ducto','Retorno de unidades de A/C > 2 000 CFM']],'wrap')
   +`<div class="h3">Reducción del espaciamiento de detectores de temperatura por altura</div>`+T(['Altura hasta','Factor'],HT_RED.map(r=>[fmt(r[0],1)+' m',String(r[1]).replace('.',',')]))});
+
+/* ============ PONCHADO Y CONECTORES ============ */
+const WC={or:'#f07d00',gn:'#1e9b3a',bl:'#1f5fd1',br:'#7b3f12',wh:'#ffffff',rd:'#d32222',bk:'#111111',ye:'#f4d000',vi:'#8a3fc7',gy:'#8a8a8a'};
+const WN={or:'Naranja',gn:'Verde',bl:'Azul',br:'Café'};
+const T568B=[['wh','or'],['or'],['wh','gn'],['bl'],['wh','bl'],['gn'],['wh','br'],['br']];
+const T568A=[['wh','gn'],['gn'],['wh','or'],['bl'],['wh','bl'],['or'],['wh','br'],['br']];
+const wname=w=>w.length>1?'Bl-'+WN[w[1]].toLowerCase():WN[w[0]];
+function stripeDefs(){return `<defs>${['or','gn','bl','br'].map(c=>`<pattern id="st-${c}" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(40)"><rect width="7" height="7" fill="#fff"/><rect width="3" height="7" fill="${WC[c]}"/></pattern>`).join('')}</defs>`}
+const wfill=w=>w.length>1?`url(#st-${w[1]})`:WC[w[0]];
+/* Conector modular visto de frente (contactos arriba, traba abajo) */
+function plugSVG(wires,title,opts){opts=opts||{};const n=wires.length,sw=Math.min(30,250/n),W=n*sw,x0=(320-W)/2;let s=stripeDefs();
+ s+=`<text x="160" y="14" font-size="11" text-anchor="middle" fill="var(--muted)">Vista de frente: contactos arriba, traba abajo, pin 1 a la izq.</text>`;
+ s+=`<rect x="${x0-14}" y="26" width="${W+28}" height="96" rx="8" fill="rgba(160,190,220,.22)" stroke="currentColor" stroke-width="1.6"/>`;
+ wires.forEach((w,i)=>{const x=x0+i*sw;s+=`<rect x="${x+sw*0.22}" y="30" width="${sw*0.56}" height="10" rx="1.5" fill="#d4a92a" stroke="#8a6d12" stroke-width=".8"/>`+
+  `<text x="${x+sw/2}" y="54" font-size="12" font-weight="700" text-anchor="middle" fill="currentColor">${opts.pins?opts.pins[i]:i+1}</text>`;
+  if(w)s+=`<rect x="${x+sw*0.16}" y="60" width="${sw*0.68}" height="128" rx="${sw*0.34}" fill="${wfill(w)}" stroke="rgba(0,0,0,.45)" stroke-width="1"/>`;
+  if(opts.lab&&opts.lab[i])s+=`<text x="${x+sw/2}" y="208" font-size="16" font-weight="700" text-anchor="middle" fill="${opts.labc&&opts.labc[i]||'currentColor'}">${opts.lab[i]}</text>`});
+ s+=`<rect x="${x0-6}" y="150" width="${W+12}" height="40" rx="6" fill="rgba(31,95,209,.14)" stroke="currentColor" stroke-dasharray="3 3"/>`;
+ if(!opts.lab)wires.forEach((w,i)=>{if(!w)return;const x=x0+i*sw+sw/2;s+=`<text transform="translate(${x},206) rotate(-55)" font-size="10" fill="currentColor" text-anchor="end">${wname(w)}</text>`});
+ return svgWrap(s,opts.h||(opts.lab?214:252),title)}
+const wireTbl=(std)=>T(['Pin','Color','Par','10/100 Mbps','1 Gbps'],std.map((w,i)=>{const sw=`<span class="sw" style="background:${w.length>1?`repeating-linear-gradient(45deg,#fff 0 3px,${WC[w[1]]} 3px 6px)`:WC[w[0]]}"></span>`;
+ const pair={bl:'Par 1',or:'Par 2',gn:'Par 3',br:'Par 4'}[w[w.length-1]];
+ return [String(i+1),sw+wname(w),pair,['TX+','TX−','RX+','—','—','RX−','—','—'][i],['DA+','DA−','DB+','DC+','DC−','DB−','DD+','DD−'][i]]}));
+
+tbl({id:'rj45-normas',cat:'ponchado',ab:'RJ45',name:'RJ45: norma T568A y T568B',desc:'Orden de colores para ponchar conectores y jacks RJ45 (TIA-568), con diagrama.',kw:'rj45 t568a t568b 568a 568b orden colores ponchado ponchar red ethernet utp',
+ html:()=>`<div class="dgs">${plugSVG(T568B,'T568B — el más usado en Nicaragua y EE. UU.')}${plugSVG(T568A,'T568A — requerido en proyectos de gobierno de EE. UU.')}</div>`
+  +`<div class="note">Truco para recordar T568B: <b>blanco-naranja, naranja, blanco-verde, azul, blanco-azul, verde, blanco-café, café</b>. T568A es igual pero intercambiando el naranja con el verde. Use <b>un solo estándar en todo el proyecto</b>, en los dos extremos.</div>`
+  +`<div class="h3">T568B</div>`+wireTbl(T568B)+`<div class="h3">T568A</div>`+wireTbl(T568A)});
+
+tbl({id:'rj45-directo-cruzado',cat:'ponchado',ab:'⇄',name:'Cable directo y cable cruzado',desc:'Cuándo usar cada uno y cómo se ponchan ambos extremos.',kw:'cable directo cruzado crossover straight through mdi mdix',
+ html:()=>`<div class="h3">Cable directo (straight-through)</div><div class="dgs">${plugSVG(T568B,'Extremo 1: T568B')}${plugSVG(T568B,'Extremo 2: T568B')}</div>`
+  +`<div class="h3">Cable cruzado (crossover)</div><div class="dgs">${plugSVG(T568B,'Extremo 1: T568B')}${plugSVG(T568A,'Extremo 2: T568A')}</div>`
+  +T(['Tipo','Extremos','Uso'],[['Directo','B – B (o A – A)','PC/cámara/AP/teléfono IP ↔ switch; patch panel ↔ switch. Es el 99 % de los casos'],['Cruzado 10/100','A – B (1↔3, 2↔6)','Equipo igual con igual (PC ↔ PC, switch ↔ switch) en equipos antiguos'],['Cruzado Gigabit','1↔3, 2↔6, 4↔7, 5↔8','Igual que el anterior a 1 Gbps']],'wrap')
+  +`<div class="note">Los equipos actuales tienen <b>Auto MDI-X</b> y detectan el cruce solos: en la práctica se usa siempre cable directo.</div>`});
+
+tbl({id:'rj45-paso-a-paso',cat:'ponchado',ab:'✂',name:'Cómo ponchar un RJ45 (paso a paso y norma)',desc:'Procedimiento correcto, medidas de la norma TIA-568 y fallas comunes del probador.',kw:'como ponchar paso a paso procedimiento destrenzado ponchadora probador tester wiremap certificar fallas',
+ html:()=>`<div class="card"><ol class="steps">${[
+  ['Pele la chaqueta','Retire 3–5 cm con pelador de cable, sin cortar el aislamiento de los hilos. Corte el hilo de rasgado y la cruceta (separador) del Cat 6.'],
+  ['Destrence lo mínimo','Separe los pares solo lo necesario para ordenarlos. Máximo <b>13 mm</b> de destrenzado (TIA-568.2-D).'],
+  ['Ordene los colores','Según T568B (o T568A) con el conector en la mano: contactos arriba, traba abajo, pin 1 a la izquierda.'],
+  ['Corte parejo','Alinee los 8 hilos y córtelos rectos dejando ≈ 12 mm fuera de la chaqueta (con conector de paso “pass-through” se cortan después).'],
+  ['Inserte hasta el fondo','Los 8 hilos deben tocar el fondo del conector y la <b>chaqueta quedar dentro</b> del conector, bajo la cuña de sujeción.'],
+  ['Ponche','Apriete con la ponchadora hasta el final del recorrido. Verifique que los 8 contactos bajaron parejos.'],
+  ['Ponga la bota','Proteja la traba con bota o capuchón (deslícela en el cable antes de ponchar).'],
+  ['Pruebe','Use probador (wiremap) en los dos extremos; en proyectos certificados, certificador Fluke DSX o similar.']].map(([t,d])=>`<li><b>${t}.</b> ${d}</li>`).join('')}</ol></div>`
+  +`<div class="h3">Medidas de la norma (TIA-568.2-D / TIA-569)</div>`+T(['Parámetro','Valor'],[['Destrenzado máximo en la terminación','13 mm (½")'],['Radio mínimo de curvatura UTP','4 × diámetro del cable (≈ 25 mm)'],['Tensión máxima de jalado (4 pares)','110 N (25 lbf)'],['Enlace permanente / canal','90 m / 100 m'],['Holgura en el cuarto de telecomunicaciones','≈ 3 m'],['Holgura en la salida','≈ 30 cm'],['Conectores','De la misma categoría que el cable (Cat 6 con Cat 6)'],['Amarres','Velcro; los cinchos plásticos apretados dañan el cable']],'wrap')
+  +`<div class="h3">Fallas que muestra el probador</div>`+T(['Falla','Causa típica'],[['Abierto (open)','Hilo no llegó al fondo o contacto no ponchado'],['Corto (short)','Contacto aplastado o aislamiento dañado'],['Par cruzado (crossed)','Un extremo en T568A y el otro en T568B'],['Par invertido (reversed)','Los dos hilos de un mismo par intercambiados'],['Par dividido (split pair)','Hilos de pares distintos mezclados (ej. 3-6 con azul): pasa continuidad pero falla en velocidad (NEXT)'],['Longitud excesiva','Más de 100 m de canal']],'wrap')});
+
+tbl({id:'keystone-patch',cat:'ponchado',ab:'110',name:'Jack keystone, patch panel y bloque 110',desc:'Cómo terminar jacks y patch panels con herramienta de impacto, y el código A/B del jack.',kw:'keystone jack patch panel 110 impacto punch down herramienta terminar placa face plate',
+ html:()=>`<div class="card"><ol class="steps">${[
+  ['Pele 5 cm','Sin destrenzar todavía. Deje la chaqueta lo más cerca posible del jack.'],
+  ['Guíese por la etiqueta','Cada jack trae impreso el código de colores <b>A</b> y <b>B</b>: use la fila del estándar del proyecto (normalmente B).'],
+  ['Coloque cada par','Pase cada par por su ranura (IDC) manteniendo el trenzado hasta el punto de contacto.'],
+  ['Impacte','Con herramienta de impacto 110 (o el cabezal del fabricante) con la <b>cuchilla hacia afuera</b> para cortar el sobrante.'],
+  ['Tape','Coloque la tapa trasera si el jack la trae y ordene el cable en la placa o en el patch panel.'],
+  ['Etiquete','Identifique ambos extremos (TIA-606): ej. P1-24 = patch panel 1, puerto 24.']].map(([t,d])=>`<li><b>${t}.</b> ${d}</li>`).join('')}</ol></div>`
+  +T(['Elemento','Recomendación'],[['Patch panel','Termine de izquierda a derecha en orden de puertos; use guía de cables y organizador horizontal por cada panel'],['Bloque 110 (voz)','Pares de 4 en clips C-4; respete el orden de 25 pares'],['Herramienta','Impacto 110 con resorte ajustable; nunca use desarmador para presionar'],['Jack de categoría','Cat 6 con Cat 6, Cat 6A con Cat 6A; blindado (STP) solo con cable blindado y con aterrizamiento']],'wrap')});
+
+const POE_A=[['+','rd'],['+','rd'],['−','bk'],[''],[''],['−','bk'],[''],['']];
+tbl({id:'poe-pines',cat:'ponchado',ab:'PoE',name:'PoE: pines y polaridad',desc:'Por qué pines va la energía en PoE 802.3af/at/bt y en PoE pasivo.',kw:'poe pines polaridad modo a modo b pasivo inyector 24v 48v ubiquiti',
+ html:()=>`<div class="dgs">${plugSVG(T568B,'Modo A: energía en pares de datos (1-2 / 3-6)',{lab:['+','+','−','','','−','',''],labc:['#d32222','#d32222','currentColor','','','currentColor','','']})}${plugSVG(T568B,'Modo B / PoE pasivo: pares libres (4-5 + / 7-8 −)',{lab:['','','','+','+','','−','−'],labc:['','','','#d32222','#d32222','','currentColor','currentColor']})}</div>`
+  +T(['Tipo','Pines con energía','Tensión','Potencia en el equipo'],[['802.3af (PoE)','Modo A (1-2/3-6) o B (4-5/7-8)','44–57 V','12,95 W'],['802.3at (PoE+)','Modo A o B','50–57 V','25,5 W'],['802.3bt (PoE++)','4 pares','50–57 V','51 W / 71,3 W'],['PoE pasivo 24 V / 48 V','4-5 (+) y 7-8 (−)','Fija','Según fuente']],'wrap')
+  +`<div class="note">⚠️ El PoE pasivo entrega tensión siempre, sin negociar: puede dañar equipos que no lo soportan. El PoE estándar (af/at/bt) solo energiza si detecta un equipo compatible. En PoE estándar el equipo acepta cualquier polaridad.</div>`});
+
+/* Balun UTP para CCTV */
+function balunSVG(){let s=stripeDefs();const rows=[['or','Video (+ / −)'],['bl','+12 V (ambos hilos)'],['gn','GND / − (ambos hilos)'],['br','Audio o RS-485 (PTZ)']];
+ s+=`<rect x="8" y="20" width="70" height="170" rx="10" fill="var(--chip)" stroke="currentColor"/><text x="43" y="40" font-size="11" font-weight="700" text-anchor="middle" fill="currentColor">CÁMARA</text><text x="43" y="54" font-size="9.5" text-anchor="middle" fill="var(--muted)">balun</text>`;
+ s+=`<rect x="242" y="20" width="70" height="170" rx="10" fill="var(--chip)" stroke="currentColor"/><text x="277" y="40" font-size="11" font-weight="700" text-anchor="middle" fill="currentColor">DVR /</text><text x="277" y="54" font-size="11" font-weight="700" text-anchor="middle" fill="currentColor">FUENTE</text>`;
+ rows.forEach(([c,l],i)=>{const y=78+i*30;s+=`<rect x="78" y="${y-6}" width="164" height="5" fill="${WC[c]}"/><rect x="78" y="${y+1}" width="164" height="5" fill="url(#st-${c})" stroke="rgba(0,0,0,.3)" stroke-width=".5"/><text x="160" y="${y-10}" font-size="10.5" font-weight="600" text-anchor="middle" fill="currentColor">${l}</text>`});
+ return svgWrap(s,200,'Asignación recomendada de pares en un UTP para cámara analógica HD')}
+tbl({id:'cctv-conexiones',cat:'ponchado',ab:'BNC',name:'CCTV: balun UTP, BNC, coaxial y RS-485',desc:'Cómo conectar cámaras analógicas HD por UTP o coaxial, ponchar BNC y cablear domos PTZ.',kw:'cctv balun utp bnc coaxial rg59 rg6 siames ponchar bnc compresion rs485 ptz pelco conector dc 5.5 camaras analogicas',
+ html:()=>`<div class="dgs">${balunSVG()}</div>`
+  +`<div class="note">Práctica recomendada: el video siempre va por <b>un mismo par trenzado completo</b> (nunca dos hilos de pares distintos) y respetando la polaridad del balun (+/−). Use el mismo orden en toda la obra. Con balun pasivo: hasta ≈ 200–300 m en 1080p; con balun activo, más.</div>`
+  +`<div class="h3">Ponchar BNC de compresión (recomendado)</div><div class="card"><ol class="steps">${[
+  ['Pele en escalones','Con pelador para RG59/RG6: ≈ 6 mm de conductor central y ≈ 6 mm de dieléctrico expuesto (siga la medida del conector).'],
+  ['Doble la malla','Doble la malla y el foil hacia atrás sobre la chaqueta, sin hilos sueltos que toquen el centro.'],
+  ['Inserte el conector','Empuje hasta que el dieléctrico quede a ras de la base interna y el conductor central asome por la punta.'],
+  ['Comprima','Con la herramienta de compresión hasta el tope. Pruebe tirando del conector.']].map(([t,d])=>`<li><b>${t}.</b> ${d}</li>`).join('')}</ol></div>`
+  +T(['Elemento','Dato'],[['Coaxial RG59 (75 Ω)','Analógico HD (TVI/CVI/AHD) ≈ 300–500 m según resolución'],['Coaxial RG6 (75 Ω)','Menor pérdida: distancias mayores'],['Cable siamés','RG59 + 2 × 18 AWG (rojo +, negro −) para alimentación'],['Conector DC de cámaras','5,5 × 2,1 mm, centro positivo (+); cable rojo = +'],['BNC crimp / twist-on','Crimp aceptable; twist-on (de rosca) no recomendado'],['Conductor central','Prefiera cobre sólido (no CCS) en distancias largas']],'wrap')
+  +`<div class="h3">RS-485 para domos PTZ (Pelco-D / Pelco-P)</div>`+T(['Punto','Dato'],[['Conexión','A (+ / D+) con A, B (− / D−) con B, en un par trenzado'],['Topología','En cadena (daisy chain), sin derivaciones en estrella'],['Terminación','Resistencia de 120 Ω en los dos extremos de la línea'],['Distancia / equipos','Hasta 1 200 m y 32 equipos por línea'],['Configuración','Igualar protocolo, velocidad (2 400 o 9 600 baudios) y dirección en DVR y cámara']],'wrap')});
+
+const USOC=[['wh'],['bk'],['rd'],['gn'],['ye'],['bl']];
+function rj11SVG(){let s='';const n=6,sw=30,x0=(320-n*sw)/2;
+ s+=`<text x="160" y="14" font-size="11" text-anchor="middle" fill="var(--muted)">RJ11/RJ12 (6 posiciones) · contactos arriba · pin 1 a la izquierda</text><rect x="${x0-14}" y="26" width="${n*sw+28}" height="96" rx="8" fill="rgba(160,190,220,.22)" stroke="currentColor" stroke-width="1.6"/>`;
+ const nm=['Blanco','Negro','Rojo','Verde','Amarillo','Azul'],fn=['Línea 3','Línea 2','Línea 1 (Ring)','Línea 1 (Tip)','Línea 2','Línea 3'];
+ USOC.forEach((w,i)=>{const x=x0+i*sw;s+=`<rect x="${x+6}" y="30" width="18" height="10" rx="1.5" fill="#d4a92a" stroke="#8a6d12" stroke-width=".8"/><text x="${x+15}" y="54" font-size="12" font-weight="700" text-anchor="middle" fill="currentColor">${i+1}</text><rect x="${x+5}" y="60" width="20" height="100" rx="10" fill="${WC[w[0]]}" stroke="rgba(0,0,0,.45)"/><text transform="translate(${x+15},176) rotate(-55)" font-size="10" fill="currentColor" text-anchor="end">${nm[i]}</text>`});
+ s+=`<rect x="${x0+2*sw}" y="164" width="${2*sw}" height="6" rx="3" fill="${JMP}"/>`;
+ return svgWrap(s,230,'Línea 1 telefónica = pines centrales 3 y 4')}
+tbl({id:'telefonia',cat:'ponchado',ab:'☎',name:'Telefonía: RJ11 y código de 25 pares',desc:'Pinout RJ11/RJ12, telefonía por cable UTP y código de colores de cable multipar.',kw:'telefonia rj11 rj12 rj45 voz par 25 pares multipar codigo colores tip ring bloque 66 110 central telefonica',
+ html:()=>`<div class="dgs">${rj11SVG()}</div>`
+  +T(['Línea','RJ11 (pines)','En RJ45 T568A/B (pines)','Par UTP'],[['Línea 1','3 – 4 (rojo/verde)','4 – 5','Azul'],['Línea 2','2 – 5 (negro/amarillo)','3 – 6','Naranja (568B) / Verde (568A)'],['Línea 3','1 – 6','1 – 2','Verde (568B) / Naranja (568A)']],'wrap')
+  +`<div class="note">Un plug RJ11 conectado en un jack RJ45 toca los pines 2 a 7 del RJ45: por eso la línea 1 del teléfono llega por el <b>par azul</b> (pines 4-5). Tip = positivo (≈ +48 V en reposo respecto a Ring), Ring = negativo.</div>`
+  +`<div class="h3">Código de colores de cable de 25 pares</div>`+(()=>{const P=['Blanco','Rojo','Negro','Amarillo','Violeta'],S=['Azul','Naranja','Verde','Café','Pizarra'];const r=[];for(let i=0;i<25;i++)r.push([String(i+1),P[Math.floor(i/5)],S[i%5]]);return T(['Par','Hilo principal (Tip)','Hilo secundario (Ring)'],r)})()
+  +`<div class="note">Para cables de 50, 100 o más pares, cada grupo de 25 se identifica con una cinta (binder) en el mismo orden: blanco-azul, blanco-naranja, blanco-verde…</div>`});
 
 /* ============ App ============ */
 {const i=CALCS.findIndex(c=>c.id==='identificar-sistema');CALCS.unshift(CALCS.splice(i,1)[0])}
