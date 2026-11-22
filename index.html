@@ -1096,6 +1096,65 @@ tbl({id:'telefonia',cat:'ponchado',ab:'☎',name:'Telefonía: RJ11 y código de 
   +`<div class="h3">Código de colores de cable de 25 pares</div>`+(()=>{const P=['Blanco','Rojo','Negro','Amarillo','Violeta'],S=['Azul','Naranja','Verde','Café','Pizarra'];const r=[];for(let i=0;i<25;i++)r.push([String(i+1),P[Math.floor(i/5)],S[i%5]]);return T(['Par','Hilo principal (Tip)','Hilo secundario (Ring)'],r)})()
   +`<div class="note">Para cables de 50, 100 o más pares, cada grupo de 25 se identifica con una cinta (binder) en el mismo orden: blanco-azul, blanco-naranja, blanco-verde…</div>`});
 
+/* ============ BATERÍAS LiFePO4 E INVERSORES ============ */
+/* Diagrama de cable: pines batería ↔ pines inversor */
+function cableMap(lt,rt,map,title,note){let s=stripeDefs();const yl=i=>40+(i-1)*24;
+ s+=`<text x="60" y="20" font-size="11.5" font-weight="700" text-anchor="middle" fill="currentColor">${lt}</text><text x="260" y="20" font-size="11.5" font-weight="700" text-anchor="middle" fill="currentColor">${rt}</text>`;
+ s+=`<rect x="22" y="28" width="76" height="${8*24}" rx="8" fill="var(--chip)" stroke="currentColor"/><rect x="222" y="28" width="76" height="${8*24}" rx="8" fill="var(--chip)" stroke="currentColor"/>`;
+ for(let i=1;i<=8;i++){s+=`<text x="44" y="${yl(i)+4}" font-size="11" fill="var(--muted)" text-anchor="middle">${i}</text><circle cx="88" cy="${yl(i)}" r="5" fill="var(--card)" stroke="currentColor"/><text x="276" y="${yl(i)+4}" font-size="11" fill="var(--muted)" text-anchor="middle">${i}</text><circle cx="232" cy="${yl(i)}" r="5" fill="var(--card)" stroke="currentColor"/>`}
+ map.forEach(([a,b,l,w])=>{const y1=yl(a),y2=yl(b);w=w||T568B[a-1];const f=wfill(w);
+  s+=`<path d="M93 ${y1} C160 ${y1} 160 ${y2} 227 ${y2}" fill="none" stroke="rgba(0,0,0,.45)" stroke-width="8"/><path d="M93 ${y1} C160 ${y1} 160 ${y2} 227 ${y2}" fill="none" stroke="${w.length>1?WC[w[1]]:WC[w[0]]}" stroke-width="6" ${w.length>1?'stroke-dasharray="5 4"':''}/>`;
+  s+=`<circle cx="88" cy="${y1}" r="5" fill="${JMP}" stroke="currentColor"/><circle cx="232" cy="${y2}" r="5" fill="${JMP}" stroke="currentColor"/>`;
+  s+=`<text x="218" y="${y2-8}" font-size="11" font-weight="700" text-anchor="end" fill="currentColor" paint-order="stroke" stroke="var(--card)" stroke-width="4">${l}</text>`});
+ return svgWrap(s,234,title)}
+
+tbl({id:'bms-cables',cat:'ponchado',ab:'BMS',name:'Cables de comunicación BMS (baterías de litio ↔ inversor)',desc:'Pinout CAN y RS485 para baterías LiFePO4 (Pylontech y compatibles) con Deye, Growatt, Voltronic/Axpert, Victron, Solis y SMA.',kw:'bms can rs485 bateria litio lifepo4 pylontech dyness deye sunsynk growatt voltronic axpert mpp must victron solis sma cable comunicacion pinout ponchar',
+ html:()=>`<div class="note">⚠️ <b>Ponche solo los hilos que se usan.</b> En baterías Pylontech serie C (US2000C/US3000C/US5000) y compatibles, los pines 1, 2 y 3 del puerto CAN deben quedar <b>vacíos</b>: un cable de red completo puede impedir la comunicación. Cuente los pines con la traba hacia abajo y los contactos hacia usted.</div>`
+  +`<div class="h3">Protocolo CAN (el más usado)</div><div class="dgs">${cableMap('BATERÍA (CAN)','INVERSOR',[[4,4,'CAN-H'],[5,5,'CAN-L']],'Batería Pylontech/compatible ↔ Deye, Sunsynk, Solis, Growatt SPF-ES (puerto BMS)')}${cableMap('BATERÍA (CAN)','VICTRON VE.Can',[[4,7,'CAN-H'],[5,8,'CAN-L'],[6,3,'GND']],'Batería ↔ Victron GX (VE.Can / BMS-Can), cable tipo A')}</div>`
+  +`<div class="h3">Protocolo RS485</div><div class="dgs">${cableMap('BATERÍA (RS485)','VOLTRONIC / AXPERT',[[7,5,'RS485-A'],[8,3,'RS485-B']],'Batería Pylontech ↔ Voltronic, Axpert, MPP Solar, Kodak, Must (puerto BMS)')}${cableMap('BATERÍA (CAN)','DEYE 2 en 1',[[4,4,'CAN-H'],[5,5,'CAN-L']],'Deye con puerto BMS 2 en 1: 1-2-3 = RS485 (monitoreo), 4-5 = CAN batería')}</div>`
+  +`<div class="h3">Pinout por marca (verifique el manual de su modelo)</div>`+T(['Equipo','Puerto','Pines'],[
+   ['Pylontech US2000C/US3000C/US5000','CAN','4 = CAN-H · 5 = CAN-L · 6 = GND (opcional) · 1-2-3 vacíos'],
+   ['Pylontech (todas)','RS485','7 = RS485-A · 8 = RS485-B'],
+   ['Pylontech antiguas (US2000B)','CAN','4 = CAN-H · 5 = CAN-L · 2 = GND'],
+   ['Deye / Sunsynk / Sol-Ark','BMS (CAN)','4 = CAN-H · 5 = CAN-L (cable directo con la mayoría de baterías)'],
+   ['Deye puerto 2 en 1','BMS','1 = RS485-B · 2 = RS485-A · 3 = GND · 4 = CAN-H · 5 = CAN-L'],
+   ['Voltronic / Axpert / MPP / Must','BMS (RS485)','3 = RS485-B · 5 = RS485-A'],
+   ['Victron GX (VE.Can / BMS-Can)','CAN','7 = CAN-H · 8 = CAN-L · 3 = GND'],
+   ['Solis híbridos','CAN','4 = CAN-H (azul) · 5 = CAN-L (blanco-azul)'],
+   ['SMA Sunny Island / Home Storage','CAN','4 = CAN_H · 5 = CAN_L · 3 = RS485 D+ · 6 = RS485 D−'],
+   ['Growatt SPF-ES (5000 ES)','BMS','CAN 4-5 con baterías tipo Pylontech; RS485 según protocolo (consulte manual)'],
+   ['Growatt SPF 6000T–12000T DVM','BMS','Solo RS485 en pines 1 y 2'],
+   ['Baterías genéricas (Seplos, JK, Daly, Felicity)','CAN / RS485','Varía por fabricante: revise el manual y seleccione el protocolo del inversor en la app del BMS']],'wrap')
+  +`<div class="h3">Pasos para que comuniquen</div><div class="card"><ol class="steps">${[
+   ['Batería maestra','Conecte el inversor a la batería maestra (dirección 1). Las demás se enlazan entre sí por el puerto Link/RS485 según el fabricante.'],
+   ['DIP switches','Configure la dirección y el protocolo de la batería (ej. Pylontech: protocolo y velocidad según manual; maestra con dirección 1).'],
+   ['Protocolo en el inversor','Deye: Batt Mode «Lithium» + número de protocolo (00 = Pylontech CAN) · Growatt: tipo «Li» + protocolo · Voltronic: tipo «PYL» o «LIb» · Victron: GX detecta la batería por CAN.'],
+   ['Velocidad CAN','Normalmente 500 kbps; resistencia de 120 Ω solo en los extremos del bus.'],
+   ['Verifique','El inversor debe mostrar SOC %, tensión y límites de carga/descarga enviados por el BMS. Si muestra error de BMS, revise el orden de pines y que 1-2-3 estén libres.']].map(([t,d])=>`<li><b>${t}.</b> ${d}</li>`).join('')}</ol></div>`});
+
+/* Calculadora de parámetros del inversor */
+const PERF={larga:{n:'Larga vida',b:3.45,f:3.35,g:3.20,r:3.33,a:3.10,c:3.05,s:3.25},std:{n:'Estándar',b:3.50,f:3.375,g:3.15,r:3.33,a:3.08,c:3.00,s:3.20},max:{n:'Máxima capacidad',b:3.55,f:3.40,g:3.10,r:3.35,a:3.00,c:2.90,s:3.15}};
+const PB={agm:{n:'AGM',b:2.40,f:2.27,e:null},gel:{n:'GEL',b:2.35,f:2.25,e:null},fld:{n:'Inundada (abierta)',b:2.45,f:2.25,e:2.55}};
+add({id:'inversor-config',cat:'proyectos',ab:'⚙V',name:'Configuración del inversor (batería USER)',desc:'Valores de bulk, flotación, vuelta a red, vuelta a batería, corte con y sin red y corrientes según el voltaje y tipo de batería.',kw:'inversor configuracion user use bulk absorcion flotacion float corte bajo voltaje lvd vuelta a red back to utility back to battery sbu lifepo4 litio agm gel deye growatt voltronic axpert parametros programa',
+ inputs:[{id:'q',l:'Tipo de batería',t:'sel',o:[['lfp','LiFePO4'],['agm','AGM'],['gel','GEL'],['fld','Inundada']],d:'lfp'},
+  {id:'V',l:'Voltaje del banco',t:'sel',o:[['12','12 V'],['24','24 V'],['48','48 V']],d:'48'},
+  {id:'cel',l:'Celdas LiFePO4 en serie',t:'sel',o:[['16','16 S (51,2 V)'],['15','15 S (48 V)']],d:'16',show:v=>v.q==='lfp'&&v.V==='48'},
+  {id:'pf',l:'Perfil',t:'sel',o:[['larga','Larga vida'],['std','Estándar'],['max','Máxima']],d:'std',show:v=>v.q==='lfp',h:'Larga vida: menos estrés, menos capacidad útil · Máxima: más energía, más desgaste'},
+  {id:'Ah',l:'Capacidad del banco',u:'Ah',d:'200'},{id:'Imax',l:'Corriente máx. de carga de la batería (hoja técnica)',u:'A',opt:1,d:'',h:'Si la deja vacía se usa 0,5 C para LiFePO4 y 0,2 C para plomo'}],
+ calc(v){const lfp=v.q==='lfp';const n=lfp?(v.V==='48'?+(v.cel||16):v.V==='24'?8:4):(+v.V)/2;const F=x=>fmt(x*n,1)+' V';const rows=[];let tbl='';
+  if(lfp){const p=PERF[v.pf];const Ic=isFinite(v.Imax)?v.Imax:v.Ah*0.5;const Irec=Math.min(Ic,v.Ah*0.3);
+   rows.push(['Tipo de batería en el inversor','USER / USE (o “Li” sin comunicación)','txt'],['Bulk / Absorción (C.V.)',F(p.b),'main'],['Flotación (Float)',F(p.f),'main'],['Ecualización','Deshabilitada (o igual al bulk)','txt'],['Tiempo de absorción','30–60 min (o hasta corriente < 0,05 C)','txt'],
+    ['Vuelta a red · corte CON red (SBU)',F(p.g),'main'],['Vuelta a batería (SBU)',F(p.r)],['Alarma de bajo voltaje',F(p.a)],['Corte SIN red (LVD / Shutdown)',F(p.c),'main'],['Reinicio tras el corte (Restart)',F(p.s)],
+    ['Máximo absoluto (no superar)',F(3.65),'bad'],['Corriente de carga recomendada',fmt(Irec,0)+' A (máx. '+fmt(Ic,0)+' A)','txt'],['Corriente de carga desde la red','≤ '+fmt(Irec,0)+' A']);
+   tbl=T(['Parámetro','V por celda'],[['Bulk',p.b],['Flotación',p.f],['Vuelta a red',p.g],['Vuelta a batería',p.r],['Corte sin red',p.c],['Reinicio',p.s]].map(r=>[r[0],fmt(r[1],3)]))}
+  else{const p=PB[v.q];const Ic=isFinite(v.Imax)?v.Imax:v.Ah*0.2;
+   rows.push(['Tipo de batería en el inversor','USER / USE (o '+p.n+' si existe)','txt'],['Bulk / Absorción (C.V.)',F(p.b),'main'],['Flotación (Float)',F(p.f),'main'],['Ecualización',p.e?F(p.e)+' cada 30 días, 1–2 h':'Deshabilitada'],['Tiempo de absorción','2–4 h','txt'],
+    ['Vuelta a red · corte CON red (SBU)',F(2.05),'main'],['Vuelta a batería (SBU)',F(2.25)],['Alarma de bajo voltaje',F(1.92)],['Corte SIN red (LVD / Shutdown)',F(1.80),'main'],['Reinicio tras el corte (Restart)',F(2.10)],
+    ['Corriente de carga recomendada',fmt(Math.min(Ic,v.Ah*0.2),0)+' A (0,1–0,2 C)'],['Compensación por temperatura','−3 mV/°C por celda (−'+fmt(0.003*n*1000,0)+' mV/°C)','txt']);
+   tbl=''}
+  const html=`<div class="h3" style="margin-top:0">Dónde se configura</div>`+T(['Parámetro','Voltronic / Axpert / MPP','Deye / Sunsynk'],[['Tipo de batería','05 → USE','Batt Mode → Use Batt V'],['Corriente máx. de carga','02','Max A Charge'],['Corriente de carga desde red','11','Grid Charge → A'],['Vuelta a red (SBU)','12','Low Batt V'],['Vuelta a batería','13','Restart V / Grid charge off'],['Bulk / Absorción (C.V.)','26','Absorption V'],['Flotación','27','Float V'],['Corte sin red (LVD)','29','Shutdown V'],['Ecualización','33 (según modelo)','Equalization V']],'wrap')+(tbl?`<div class="h3">Valores por celda</div>`+tbl:'');
+  return {after:html,rows,note:(lfp?'Use estos valores solo cuando la batería NO comunica con el inversor (modo USER). Con comunicación BMS (CAN/RS485), el BMS fija los voltajes y corrientes; configure por SOC: vuelta a red 20–30 %, vuelta a batería 80–100 %, corte con red 20 %, corte sin red 10–15 %. ':'')+'Los valores del fabricante de la batería siempre prevalecen. Mantenga “vuelta a batería” por encima de “vuelta a red” y el corte sin red por encima del corte del BMS.'}}});
+
 /* ============ App ============ */
 {const i=CALCS.findIndex(c=>c.id==='identificar-sistema');CALCS.unshift(CALCS.splice(i,1)[0])}
 const ALL=CALCS;
@@ -1162,7 +1221,7 @@ function compute(){const c=cur,v=parsedVals();const vis=c.inputs.filter(i=>!i.sh
  if(miss.length)r={error:'Complete: '+miss.map(i=>i.l.toLowerCase()).join(', ')+'.'};else{try{r=c.calc(v)}catch(e){r={error:'Revise los datos ingresados.'}}}
  lastRes=r;if(r.error){$('#out').innerHTML=`<div class="res err"><div class="rrow"><span class="k">${esc(r.error)}</span></div></div>`;setBar({k:'Faltan datos',v:'',err:1});return}
  $('#out').innerHTML=`<div class="sec-title" style="margin-top:16px">Resultado</div>`+(r.html?`<div class="card" style="margin-bottom:10px">${r.html}</div>`:'')+`<div class="res">${r.rows.map(([k,val,cls])=>{cls=cls||'';const m=cls.includes('main');const st=cls.replace('main','').trim();
-  return `<div class="rrow ${m?'main':''}"><span class="k">${esc(k)}</span><span class="v ${st}">${esc(val)}</span></div>`}).join('')}</div>`+(r.note?`<div class="note">ℹ️ ${esc(r.note)}</div>`:'');
+  return `<div class="rrow ${m?'main':''}"><span class="k">${esc(k)}</span><span class="v ${st}">${esc(val)}</span></div>`}).join('')}</div>`+(r.note?`<div class="note">ℹ️ ${esc(r.note)}</div>`:'')+(r.after?`<div class="card" style="margin-top:10px">${r.after}</div>`:'');
  const mr=r.rows.find(x=>(x[2]||'').includes('main'))||r.rows[0];setBar({k:mr[0],v:String(mr[1]),cls:(mr[2]||'').replace('main','').trim()})}
 /* barra de resultado fija */
 let barObs=null;
